@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../utils/particle_util.dart';
 import '../widgets/particle_widget.dart';
 import '../models/particle_model.dart';
+import '../widgets/to_app_button_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -57,9 +58,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Start Your Journey',
+                  'Izzy Appz Portfolio',
                   style: TextStyle(
-                    fontSize: 48,
+                    fontSize: 36,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -73,16 +74,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ),
                 ),
                 SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () {
-                    // Add navigation to demo apps
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.1),
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                  ),
-                  child: Text('Get Started', style: TextStyle(color: Colors.white)),
+                ToAppButtonWidget(
+                  appName: 'Blackjack Basic Strategy App',
+                  routeName: '/blackjack',
+                ),
+                SizedBox(height: 16),
+                ToAppButtonWidget(
+                  appName: 'Instagram Education App',
+                  routeName: '/instagram',
+                ),
+                SizedBox(height: 16),
+                ToAppButtonWidget(
+                  appName: 'Recipie App',
+                  routeName: '/recipie',
                 ),
               ],
             ),
