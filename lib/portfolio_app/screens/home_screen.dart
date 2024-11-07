@@ -2,7 +2,6 @@
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../utils/particle_util.dart';
 import '../widgets/particle_widget.dart';
 import '../models/particle_model.dart';
