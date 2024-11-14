@@ -5,8 +5,26 @@ import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../widgets/game_stats_widget.dart';
 import '../../portfolio_app/other/themes.dart';
+import '../../portfolio_app/widgets/custom_nav_bar.dart';
+import '../other/custom_divider.dart';
 
-class GameResultsScreen extends StatelessWidget {
+class GameResultsScreen extends StatefulWidget {
+  @override
+  _GameResultsScreenState createState() => _GameResultsScreenState();
+}
+
+class _GameResultsScreenState extends State<GameResultsScreen> {
+  void _onItemTapped(int index) {
+    switch (index) {
+      case 0:
+        Navigator.pushNamed(context, '/');
+        break;
+      case 1:
+        Navigator.pushNamed(context, '/blackjack');
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context, listen: false);
@@ -20,8 +38,10 @@ class GameResultsScreen extends StatelessWidget {
         ),
         body: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              CustomDivider(),
+              SizedBox(height: 32),
               Text(
                 'Thanks for playing!',
                 style: TextStyle(
@@ -50,6 +70,13 @@ class GameResultsScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        bottomNavigationBar: CustomBottomNavBar(
+          onItemSelected: _onItemTapped,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.casino), label: 'Blackjack'),
+          ],
         ),
       ),
     );

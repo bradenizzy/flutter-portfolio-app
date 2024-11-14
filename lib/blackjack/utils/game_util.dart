@@ -3,6 +3,14 @@
 import '../models/hand.dart';
 
 class GameUtils {
+  
+  // Helper function to check if a hand qualifies for double-down mode
+  bool isDoubleDownHand(Hand hand) {
+    bool soft = isSoft(hand);
+    int handValue = hand.totalValue;
+    // Check if the hand meets criteria
+    return handValue == 9 || handValue == 10 || handValue == 11 || (soft && handValue != 20);
+  }
 
   bool hasBlackjack(Hand hand) {
     return hand.totalValue == 21 && hand.cards.length == 2;

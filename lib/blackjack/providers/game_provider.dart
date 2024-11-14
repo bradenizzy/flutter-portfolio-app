@@ -91,13 +91,85 @@ class GameProvider extends ChangeNotifier {
     }
   }
 
+  // method for traditional mode
+  void dealTraditionalCardsToPlayer() {
+    for (int i = 0; i < 2; i++) {
+      dealCardToPlayer(activeHandIndex);
+      dealCardToDealer();
+    }
+  }
+
   // Method for "Split Hands" mode
   void dealSplittingCardsToPlayer() {
     if (numberOfPlayedHands == numberOfHands) {
       endGame();
     }
-    shuffleDeck();
 
+    shuffleDeck();
+    generateSplittingHand();
+
+    // Remove the splitting cards from the deck
+    for (PlayingCard card in playerHands[activeHandIndex].cards) {
+      deck.removeWhere((deckCard) => deckCard.rank == card.rank && deckCard.suit == card.suit);
+    }
+
+    // Deal initial cards to the dealer
+    dealCardToDealer();
+    dealCardToDealer();
+
+    numberOfPlayedHands++;
+
+    notifyListeners();
+  }
+
+  // Method for "Double Down" mode
+  void dealDoubleDownCardsToPlayer() {
+    if (numberOfPlayedHands == numberOfHands) {
+      endGame();
+    }
+
+    shuffleDeck();
+    generateDoubleDownHand();
+
+    // remove the player's double down cards from the deck
+    for (PlayingCard card in playerHands[activeHandIndex].cards) {
+      deck.removeWhere((deckCard) => deckCard.rank == card.rank && deckCard.suit == card.suit);
+    }
+
+    // Deal initial cards to the dealer
+    dealCardToDealer();
+    dealCardToDealer();
+
+    numberOfPlayedHands++;
+
+    notifyListeners();
+  }
+
+  // method for soft hands mode
+  void dealSoftHandsCardsToPlayer() {
+    if (numberOfPlayedHands == numberOfHands) {
+      endGame();
+    }
+
+    shuffleDeck();
+    generateSoftHandsHand();
+
+    // remove the player's soft hand cards from the deck
+    for (PlayingCard card in playerHands[activeHandIndex].cards) {
+      deck.removeWhere((deckCard) => deckCard.rank == card.rank && deckCard.suit == card.suit);
+    }
+
+    // Deal initial cards to the dealer
+    dealCardToDealer();
+    dealCardToDealer();
+
+    numberOfPlayedHands++;
+
+    notifyListeners();
+  }
+
+  // split hands mode helper method
+  void generateSplittingHand(){
     // Pick a random rank
     List<String> splitRanks = cardValues.keys.toList();
     String chosenRank = splitRanks[Random().nextInt(splitRanks.length)];
@@ -118,34 +190,82 @@ class GameProvider extends ChangeNotifier {
     playerHands[activeHandIndex].addCard(card1);
     playerHands[activeHandIndex].addCard(card2);
 
-    // remove the splitting cards from the deck
-    deck.removeWhere((card) => card.rank == chosenRank && (card.suit == randomSuits[0] || card.suit == randomSuits[1]));
-
-    // Deal initial cards to the dealer
-    dealCardToDealer();
-    dealCardToDealer();
-
-    numberOfPlayedHands++;
-
     notifyListeners();
   }
 
-  // method for traditional mode
-  void dealTraditionalCardsToPlayer() {
-    for (int i = 0; i < 2; i++) {
-      dealCardToPlayer(activeHandIndex);
-      dealCardToDealer();
+  // double down mode helper method
+  void generateDoubleDownHand() {
+    List<String> ranks = cardValues.keys.toList();
+    List<String> suits = ["Clubs", "Spades", "Hearts", "Diamonds"];
+    List<String> randomSuits = [];
+    Hand hand = Hand();
+
+    // generate a valid double down hand
+    while (true) {
+      hand.reset();
+
+      // Randomly select two cards
+      String rank1 = ranks[Random().nextInt(ranks.length)];
+      String rank2 = ranks[Random().nextInt(ranks.length)];
+
+      while (randomSuits.length < 2) {
+        String randomSuit = suits[Random().nextInt(suits.length)];
+        if (!randomSuits.contains(randomSuit)) {
+          randomSuits.add(randomSuit);
+        }
+      }
+
+      PlayingCard card1 = PlayingCard(suit: randomSuits[0], rank: rank1);
+      PlayingCard card2 = PlayingCard(suit: randomSuits[1], rank: rank2);
+
+      hand.addCard(card1);
+      hand.addCard(card2);
+
+      // Check if the hand meets double-down criteria
+      if (gameUtils.isDoubleDownHand(hand)) {
+        playerHands[activeHandIndex].addCard(card1);
+        playerHands[activeHandIndex].addCard(card2);
+        break;
+      }
     }
+    notifyListeners();
   }
 
-  // method for double down mode
-  void dealDoubleDownCardsToPlayer() {
-    // TODO: implement
-  }
+  // "Soft Hands" mode helper method
+  void generateSoftHandsHand() {
+    List<String> ranks = cardValues.keys.toList();
+    List<String> suits = ["Clubs", "Spades", "Hearts", "Diamonds"];
+    List<String> randomSuits = [];
+    Hand hand = Hand();
 
-  // method for soft hands mode
-  void dealSoftHandsCardsToPlayer() {
-    // TODO: implement
+    while (true) {
+      hand.reset();
+
+      // Randomly select two cards
+      String rank1 = ranks[Random().nextInt(ranks.length)];
+      String rank2 = ranks[Random().nextInt(ranks.length)];
+
+      while (randomSuits.length < 2) {
+        String randomSuit = suits[Random().nextInt(suits.length)];
+        if (!randomSuits.contains(randomSuit)) {
+          randomSuits.add(randomSuit);
+        }
+      }
+
+      PlayingCard card1 = PlayingCard(suit: randomSuits[0], rank: rank1);
+      PlayingCard card2 = PlayingCard(suit: randomSuits[1], rank: rank2);
+
+      hand.addCard(card1);
+      hand.addCard(card2);
+
+      // Check if the hand meets double-down criteria
+      if (gameUtils.isSoft(hand) && hand.totalValue < 21 && card1.rank != card2.rank) {
+        playerHands[activeHandIndex].addCard(card1);
+        playerHands[activeHandIndex].addCard(card2);
+        break;
+      }
+    }
+    notifyListeners();
   }
 
   void hit() {

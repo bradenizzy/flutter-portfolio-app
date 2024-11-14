@@ -6,8 +6,25 @@ import '../other/custom_divider.dart';
 import '../widgets/welcome_to_mode.dart';
 import '../widgets/set_shoe_widget.dart';
 import '../widgets/play_now_button.dart';
+import '../../portfolio_app/widgets/custom_nav_bar.dart';
 
-class TraditionalBlackjack extends StatelessWidget {
+class TraditionalBlackjack extends StatefulWidget {
+  @override
+  _TraditionalBlackjackState createState() => _TraditionalBlackjackState();
+}
+
+class _TraditionalBlackjackState extends State<TraditionalBlackjack> {
+  void _onItemTapped(int index) {
+    switch (index) {
+      case 0:
+        Navigator.pushNamed(context, '/');
+        break;
+      case 1:
+        Navigator.pushNamed(context, '/blackjack');
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -24,6 +41,13 @@ class TraditionalBlackjack extends StatelessWidget {
             SetShoe(),
             SizedBox(height: 32),
             PlayNowButton(),
+          ],
+        ),
+        bottomNavigationBar: CustomBottomNavBar(
+          onItemSelected: _onItemTapped,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.casino), label: 'Blackjack'),
           ],
         ),
       ),

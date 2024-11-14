@@ -39,7 +39,7 @@ class _BlackjackCelebrationState extends State<BlackjackCelebration> with Single
           left: startX,
           child: Icon(
             Icons.attach_money,
-            color: Colors.green.shade700,
+            color: const Color.fromARGB(255, 69, 244, 78),
             size: 30,
           ),
         );
@@ -60,7 +60,7 @@ class _BlackjackCelebrationState extends State<BlackjackCelebration> with Single
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withOpacity(0.8),
               borderRadius: BorderRadius.circular(8.0),
             ),
             child: Text(

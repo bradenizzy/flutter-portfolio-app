@@ -5,12 +5,12 @@ import 'number_of_hands_widget.dart';
 import '../../../blackjack/providers/game_provider.dart';
 import 'package:provider/provider.dart';
 
-class SplitHandsParameters extends StatefulWidget {
+class NumHandsParameters extends StatefulWidget {
   @override
-  _SplitHandsParametersState createState() => _SplitHandsParametersState();
+  _NumHandsParametersState createState() => _NumHandsParametersState();
 }
 
-class _SplitHandsParametersState extends State<SplitHandsParameters> {
+class _NumHandsParametersState extends State<NumHandsParameters> {
   final TextEditingController _controller = TextEditingController();
   int? numberOfHands;
 

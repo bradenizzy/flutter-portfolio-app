@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 import '../../../blackjack/widgets/next_round_button_widget.dart';
 import '../../../portfolio_app/other/themes.dart';
 import '../../../blackjack/widgets/blackjack_celebration.dart';
+import '../../../portfolio_app/widgets/custom_nav_bar.dart';
+import '../other/custom_divider.dart';
 
 class BJGameScreen extends StatefulWidget {
   @override
@@ -18,6 +20,17 @@ class BJGameScreen extends StatefulWidget {
 
 class _BJGameScreenState extends State<BJGameScreen> {
   bool showCelebration = false;
+  void _onItemTapped(int index) {
+    switch (index) {
+      case 0:
+        Navigator.pushNamed(context, '/');
+        break;
+      case 1:
+        Navigator.pushNamed(context, '/blackjack');
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
@@ -37,6 +50,8 @@ class _BJGameScreenState extends State<BJGameScreen> {
         ),
         body: Stack(
           children: [
+            CustomDivider(),
+            SizedBox(height: 32),
             SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -58,10 +73,17 @@ class _BJGameScreenState extends State<BJGameScreen> {
           // Overlay with animation when isBlackjack is true
           if (gameProvider.isBlackjack)
             Container(
-              color: Colors.white.withOpacity(0.9), 
+              color: Colors.transparent, 
               alignment: Alignment.center,
               child: BlackjackCelebration(),
             ),
+          ],
+        ),
+        bottomNavigationBar: CustomBottomNavBar(
+          onItemSelected: _onItemTapped,
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.casino), label: 'Blackjack'),
           ],
         ),
       ),

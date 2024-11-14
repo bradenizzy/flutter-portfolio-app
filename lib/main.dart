@@ -11,11 +11,13 @@ import 'instagram/screens/insta_home.dart';
 import 'blackjack/screens/blackjack_home.dart';
 import 'blackjack/providers/game_provider.dart';
 import 'blackjack/providers/stats_provider.dart';
-import 'blackjack/screens/traditional_blackjack.dart';
+import 'blackjack/screens/traditional_mode.dart';
 import 'portfolio_app/other/themes.dart';
 import 'blackjack/screens/blackjack_game_results.dart';
 import 'blackjack/screens/blackjack_game_screen.dart';
-import 'blackjack/screens/split_hands_blackjack.dart';
+import 'blackjack/screens/split_hands_mode.dart';
+import 'blackjack/screens/soft_hands_mode.dart';
+import 'blackjack/screens/double_down_mode.dart';
 
 
 void main() async {
@@ -58,6 +60,8 @@ class MyPortfolioApp extends StatelessWidget {
           '/bj_game': (context) => BJGameScreen(),
           '/traditional': (context) => TraditionalBlackjack(),
           '/split_hands': (context) => SplitHandsBlackjack(),
+          '/soft_hands': (context) => SoftHandsBlackjack(),
+          '/double_downs': (context) => DoubleDownBlackjack(),
           '/game_results': (context) => GameResultsScreen(),
         },
     );
