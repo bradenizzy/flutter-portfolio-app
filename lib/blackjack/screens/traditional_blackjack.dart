@@ -1,11 +1,11 @@
 // traditional_blackjack.dart
 
 import 'package:flutter/material.dart';
-import '../../../portfolio_app/other/themes.dart';
-import '../../../blackjack/other/custom_divider.dart';
-import '../../../blackjack/widgets/welcome_to_mode.dart';
-import '../../../blackjack/widgets/set_shoe_widget.dart';
-import '../../widgets/traditional_play_now_button.dart';
+import '../../portfolio_app/other/themes.dart';
+import '../other/custom_divider.dart';
+import '../widgets/welcome_to_mode.dart';
+import '../widgets/set_shoe_widget.dart';
+import '../widgets/play_now_button.dart';
 
 class TraditionalBlackjack extends StatelessWidget {
   @override
@@ -23,7 +23,7 @@ class TraditionalBlackjack extends StatelessWidget {
             SizedBox(height: 32),
             SetShoe(),
             SizedBox(height: 32),
-            TraditionalPlayNowButton(),
+            PlayNowButton(),
           ],
         ),
       ),

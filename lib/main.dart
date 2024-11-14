@@ -11,10 +11,12 @@ import 'instagram/screens/insta_home.dart';
 import 'blackjack/screens/blackjack_home.dart';
 import 'blackjack/providers/game_provider.dart';
 import 'blackjack/providers/stats_provider.dart';
-import 'blackjack/screens/traditional_blackjack/traditional_blackjack.dart';
+import 'blackjack/screens/traditional_blackjack.dart';
 import 'portfolio_app/other/themes.dart';
-import 'blackjack/screens/traditional_blackjack/traditional_game_screen.dart';
-import 'blackjack/screens/traditional_blackjack/traditional_game_results.dart';
+import 'blackjack/screens/blackjack_game_results.dart';
+import 'blackjack/screens/blackjack_game_screen.dart';
+import 'blackjack/screens/split_hands_blackjack.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,9 +55,10 @@ class MyPortfolioApp extends StatelessWidget {
           '/blackjack': (context) => BlackjackHome(),
           '/instagram': (context) => InstagramHome(),
           '/recipie': (context) => RecipieHome(),
+          '/bj_game': (context) => BJGameScreen(),
           '/traditional': (context) => TraditionalBlackjack(),
-          '/traditional_game': (context) => TraditionalGameScreen(),
-          '/traditional_game_results': (context) => GameResultsScreen(),
+          '/split_hands': (context) => SplitHandsBlackjack(),
+          '/game_results': (context) => GameResultsScreen(),
         },
     );
   }

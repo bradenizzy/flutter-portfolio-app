@@ -2,10 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../blackjack/providers/game_provider.dart';
-import '../../../blackjack/widgets/game_stats_widget.dart';
-import '../../../portfolio_app/other/themes.dart';
-
+import '../providers/game_provider.dart';
+import '../widgets/game_stats_widget.dart';
+import '../../portfolio_app/other/themes.dart';
 
 class GameResultsScreen extends StatelessWidget {
   @override
@@ -37,7 +36,7 @@ class GameResultsScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   gameProvider.startGame();
-                  Navigator.pushNamed(context, '/traditional_game');
+                  Navigator.pushNamed(context, '/bj_game');
                 },
                 child: Text('Play Again'),
               ),

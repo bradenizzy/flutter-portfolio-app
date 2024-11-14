@@ -30,6 +30,7 @@ class GameProvider extends ChangeNotifier {
   bool isGameOver = false;
   List<String> handResults = [];
   bool isRoundOver = false;
+  bool isBlackjack = false;
 
   // stats
   int correctActions = 0;
@@ -39,6 +40,23 @@ class GameProvider extends ChangeNotifier {
   int ties = 0;
   int handsPlayed = 0;
   
+  //game modes
+  bool isTraditionalMode = false;
+  bool isSplitHandsMode = false;
+  bool isDoubleDownMode = false;
+  bool isSoftHandsMode = false;
+
+  int numberOfHands = 1;
+  int numberOfPlayedHands = 0;
+
+
+  void setMode(String modeName) {
+    isTraditionalMode = modeName == 'Traditional';
+    isSplitHandsMode = modeName == 'Split Hands';
+    isDoubleDownMode = modeName == 'Double Downs';
+    isSoftHandsMode = modeName == 'Soft Hands';
+    notifyListeners();
+  }
 
   // update running count based on card dealt
   void updateRunningCount(PlayingCard card) {
@@ -47,6 +65,11 @@ class GameProvider extends ChangeNotifier {
     } else if (["10", "J", "Q", "K", "A"].contains(card.rank)) {
       runningCount -= 1;
     }
+    notifyListeners();
+  }
+
+  void setNumberOfHands(int value) {
+    numberOfHands = value;
     notifyListeners();
   }
 
@@ -66,6 +89,63 @@ class GameProvider extends ChangeNotifier {
       notifyListeners();
       updateRunningCount(dealtCard);
     }
+  }
+
+  // Method for "Split Hands" mode
+  void dealSplittingCardsToPlayer() {
+    if (numberOfPlayedHands == numberOfHands) {
+      endGame();
+    }
+    shuffleDeck();
+
+    // Pick a random rank
+    List<String> splitRanks = cardValues.keys.toList();
+    String chosenRank = splitRanks[Random().nextInt(splitRanks.length)];
+
+    // Add these cards to the player's hand
+    List<String> suits = ["Clubs", "Spades", "Hearts", "Diamonds"];
+    List<String> randomSuits = [];
+    while (randomSuits.length < 2) {
+      String randomSuit = suits[Random().nextInt(suits.length)];
+      if (!randomSuits.contains(randomSuit)) {
+        randomSuits.add(randomSuit);
+      }
+    }
+
+    // Create two splitting cards
+    PlayingCard card1 = PlayingCard(suit: randomSuits[0], rank: chosenRank);
+    PlayingCard card2 = PlayingCard(suit: randomSuits[1], rank: chosenRank);
+    playerHands[activeHandIndex].addCard(card1);
+    playerHands[activeHandIndex].addCard(card2);
+
+    // remove the splitting cards from the deck
+    deck.removeWhere((card) => card.rank == chosenRank && (card.suit == randomSuits[0] || card.suit == randomSuits[1]));
+
+    // Deal initial cards to the dealer
+    dealCardToDealer();
+    dealCardToDealer();
+
+    numberOfPlayedHands++;
+
+    notifyListeners();
+  }
+
+  // method for traditional mode
+  void dealTraditionalCardsToPlayer() {
+    for (int i = 0; i < 2; i++) {
+      dealCardToPlayer(activeHandIndex);
+      dealCardToDealer();
+    }
+  }
+
+  // method for double down mode
+  void dealDoubleDownCardsToPlayer() {
+    // TODO: implement
+  }
+
+  // method for soft hands mode
+  void dealSoftHandsCardsToPlayer() {
+    // TODO: implement
   }
 
   void hit() {
@@ -126,7 +206,6 @@ class GameProvider extends ChangeNotifier {
     feedback = message;
     notifyListeners();
 
-    // Set a timer to clear the feedback after 3 seconds
     Timer(Duration(seconds: 2), () {
       clearFeedback();
     });
@@ -152,14 +231,12 @@ class GameProvider extends ChangeNotifier {
       correctActions++;
       notifyListeners();
       showFeedback(message);
-      //updateFeedback(message);
       return true;
     } else {
       message = "Incorrect. You should $recommendedAction. Please try again.";
       incorrectActions++;
       notifyListeners();
       showFeedback(message);
-      //updateFeedback(message);
       return false;
     }
   }
@@ -204,6 +281,7 @@ class GameProvider extends ChangeNotifier {
   void startRound() {
     if (enoughCardsForRound()) {
       resetRound();
+      checkPlayerBlackjack();
     } else {
       endGame();
     }
@@ -214,22 +292,36 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Check player bust or continue)
+  // Check player bust or continue
   void checkPlayerBust() async {
     if (gameUtils.isBust(playerHands[activeHandIndex])) {
-      if (activeHandIndex == playerHands.length - 1) {
-        if (playerHands.length == 1) { // dont have the dealer pull any cards since our one hand is already bust
+      if (activeHandIndex == playerHands.length - 1 && playerHands.length == 1) { 
+        // dont have the dealer pull any cards since our one hand is already bust
           isPlayerTurn = false;
           isDealerTurn = true;
           notifyListeners();
           await Future.delayed(Duration(seconds: 1));
           determineOutcome();
-        }
+        } else {
         endPlayerTurn();
-      } else {
-        moveToNextHand();
       }
     } 
+  } 
+  
+  void checkPlayerBlackjack() {
+    if (gameUtils.hasBlackjack(playerHands[activeHandIndex])) {
+      isBlackjack = true;
+      notifyListeners();
+
+      Future.delayed(Duration(seconds: 1), () {
+        // let the user recognize the blackjack
+      });
+
+      Future.delayed(Duration(seconds: 3), () {
+        isBlackjack = false;
+        notifyListeners();
+      });
+    }
   }
 
   void checkPlayerContinue() {
@@ -304,9 +396,14 @@ class GameProvider extends ChangeNotifier {
     handResults = [];
 
     notifyListeners();
-    for (int i = 0; i < 2; i++) {
-      dealCardToPlayer(activeHandIndex);
-      dealCardToDealer();
+    if (isTraditionalMode) {
+      dealTraditionalCardsToPlayer();
+    } else if (isSplitHandsMode) {
+      dealSplittingCardsToPlayer();
+    } else if (isDoubleDownMode) {
+      dealDoubleDownCardsToPlayer();
+    } else if (isSoftHandsMode) {
+      dealSoftHandsCardsToPlayer();
     }
   }
 
@@ -319,6 +416,7 @@ class GameProvider extends ChangeNotifier {
     losses = 0;
     ties = 0;
     handsPlayed = 0;
+    numberOfPlayedHands = 0;
     notifyListeners(); 
     shuffleDeck();
   }

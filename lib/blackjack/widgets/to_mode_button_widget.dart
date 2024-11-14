@@ -1,6 +1,8 @@
 // to_mode_button_widget.dart
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/game_provider.dart';
 
 class ToModeButtonWidget extends StatelessWidget {
   final String modeName;
@@ -10,11 +12,13 @@ class ToModeButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gameProvider = Provider.of<GameProvider>(context);
     return SizedBox(
-      width: 250, // Set the desired fixed width for all buttons
+      width: 250,
       child: ElevatedButton(
         onPressed: () {
           Navigator.pushNamed(context, routeName);
+          gameProvider.setMode(modeName);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black.withOpacity(0.9),

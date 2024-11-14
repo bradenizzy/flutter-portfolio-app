@@ -50,7 +50,7 @@ class BlackjackHome extends StatelessWidget {
                       SizedBox(height: 16),
                       ToModeButtonWidget(modeName: 'Soft Hands', routeName: '/'), // TODO: ADD THESE MODES
                       SizedBox(height: 16),
-                      ToModeButtonWidget(modeName: 'Split Hands', routeName: '/'), // TODO: ADD THESE MODES
+                      ToModeButtonWidget(modeName: 'Split Hands', routeName: '/split_hands'), // TODO: ADD THESE MODES
                       SizedBox(height: 16),
                       ToModeButtonWidget(modeName: 'Double Downs', routeName: '/'), // TODO: ADD THESE MODES
                     ],
