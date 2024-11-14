@@ -31,8 +31,6 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AppData()),
         ChangeNotifierProvider(create: (_) => GameProvider()),
         ChangeNotifierProvider(create: (_) => StatsProvider()),
-        // ChangeNotifierProvider(create: (_) => BlackjackData()), 
-        // ChangeNotifierProvider(create: (_) => TriviaData()),
       ],
       child: MyPortfolioApp(),
     ),
