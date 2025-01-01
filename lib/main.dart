@@ -6,7 +6,7 @@ import 'portfolio_app/screens/home_screen.dart';
 import 'portfolio_app/models/app_data.dart';
 import 'portfolio_app/models/blackjack_data.dart';
 import 'portfolio_app/models/trivia_data.dart';
-import 'recipies/screens/recipie_home.dart';
+import 'recipes/screens/recipie_home.dart';
 import 'instagram/screens/insta_home.dart';
 import 'blackjack/screens/blackjack_home.dart';
 import 'blackjack/providers/game_provider.dart';
@@ -18,7 +18,7 @@ import 'blackjack/screens/blackjack_game_screen.dart';
 import 'blackjack/screens/split_hands_mode.dart';
 import 'blackjack/screens/soft_hands_mode.dart';
 import 'blackjack/screens/double_down_mode.dart';
-
+import 'recipes/screens/chef_chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,6 +61,7 @@ class MyPortfolioApp extends StatelessWidget {
           '/soft_hands': (context) => SoftHandsBlackjack(),
           '/double_downs': (context) => DoubleDownBlackjack(),
           '/game_results': (context) => GameResultsScreen(),
+          '/chef_chat': (context) => ChefChatScreen(),
         },
     );
   }
