@@ -19,8 +19,12 @@ import 'blackjack/screens/split_hands_mode.dart';
 import 'blackjack/screens/soft_hands_mode.dart';
 import 'blackjack/screens/double_down_mode.dart';
 import 'recipes/screens/chef_chat_screen.dart';
+import 'recipes/providers/recipe_provider.dart';
+import 'dart:developer' as developer;
+import 'package:flutter/rendering.dart';
 
 void main() async {
+  //debugPaintPointersEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -31,6 +35,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AppData()),
         ChangeNotifierProvider(create: (_) => GameProvider()),
         ChangeNotifierProvider(create: (_) => StatsProvider()),
+        ChangeNotifierProvider(create: (_) => RecipeProvider()),
       ],
       child: MyPortfolioApp(),
     ),
