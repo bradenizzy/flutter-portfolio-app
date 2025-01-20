@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 SizedBox(height: 16),
                 ToAppButtonWidget(
                   appName: 'Recipie App',
-                  routeName: '/recipie',
+                  routeName: '/sign_in',
                 ),
               ],
             ),

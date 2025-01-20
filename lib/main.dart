@@ -22,6 +22,7 @@ import 'recipes/screens/chef_chat_screen.dart';
 import 'recipes/providers/recipe_provider.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/rendering.dart';
+import 'recipes/screens/sign_in_screen.dart';
 
 void main() async {
   //debugPaintPointersEnabled = true;
@@ -59,7 +60,7 @@ class MyPortfolioApp extends StatelessWidget {
           '/': (context) => HomeScreen(),
           '/blackjack': (context) => BlackjackHome(),
           '/instagram': (context) => InstagramHome(),
-          '/recipie': (context) => RecipieHome(),
+          '/recipe': (context) => RecipieHome(),
           '/bj_game': (context) => BJGameScreen(),
           '/traditional': (context) => TraditionalBlackjack(),
           '/split_hands': (context) => SplitHandsBlackjack(),
@@ -67,6 +68,7 @@ class MyPortfolioApp extends StatelessWidget {
           '/double_downs': (context) => DoubleDownBlackjack(),
           '/game_results': (context) => GameResultsScreen(),
           '/chef_chat': (context) => ChefChatScreen(),
+          '/sign_in': (context) => SignInScreen(),
         },
     );
   }
