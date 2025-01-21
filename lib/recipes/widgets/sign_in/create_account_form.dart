@@ -146,7 +146,11 @@ class _CreateAccountFormState extends State<CreateAccountForm> {
               minimumSize: Size(double.infinity, 50),
             ),
             child: Text('Create Account'),
-            onPressed: _isPasswordMatched == true ? widget.onCreateAccountPressed : null,
+            onPressed: _isPasswordMatched == true
+              ? () {
+                  widget.onCreateAccountPressed();
+                }
+              : null,
           ),
         ],
       ),

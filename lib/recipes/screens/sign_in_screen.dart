@@ -20,7 +20,7 @@ class _SignInScreenState extends State<SignInScreen> with SingleTickerProviderSt
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final authService = AuthService();
-  //bool _isLoading = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -63,42 +63,42 @@ class _SignInScreenState extends State<SignInScreen> with SingleTickerProviderSt
               ),
             ],
           ),
-          // if (_isLoading) // Show loading indicator when _isLoading is true
-          //   Container(
-          //     color: Color.fromRGBO(0, 0, 0, 0.5), // Semi-transparent background
-          //     child: Center(child: CircularProgressIndicator()),
-          //   ),
+          if (_isLoading) // Show loading indicator when _isLoading is true
+            Container(
+              color: Color.fromRGBO(0, 0, 0, 0.5), // Semi-transparent background
+              child: Center(child: CircularProgressIndicator()),
+            ),
         ],
       ),
     );
   }
 
   Future<void> _signInWithEmailAndPassword(BuildContext context) async {
-    // setState(() {
-    //   _isLoading = true;
-    // });
+    setState(() {
+      _isLoading = true;
+    });
     try {
       await authService.signInWithEmailAndPassword(
         _emailController.text,
         _passwordController.text,
       );
       if (mounted) {
+        // TODO: this should eventually not be allowed to go back after entering the app
         Navigator.pushNamed(context, '/recipe');
       }
     } on FirebaseAuthException catch (e) {
       ErrorUtil.showSnackBar(context, ErrorUtil.getErrorMessage(e));
     } finally {
-    //   setState(() {
-    //     _isLoading = false;
-    //   });
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
-  // TODO: SOMETHING GOING WRONG HERE NOT MOVING TO THE NEXT SCREEN
   Future<void> _createAccount(BuildContext context) async {
-    // setState(() {
-    //   _isLoading = true;
-    // });
+    setState(() {
+      _isLoading = true;
+    });
     try {
       await authService.createAccount(
         _emailController.text,
@@ -107,16 +107,25 @@ class _SignInScreenState extends State<SignInScreen> with SingleTickerProviderSt
         _lastNameController.text,
         _phoneController.text,
       );
-      if (mounted) {
-        Navigator.pushNamed(context, '/recipe');
+      // Check if the user is signed in
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        if (mounted) {
+          // TODO: this should eventually not be allowed to go back after entering the app
+          Navigator.pushNamed(context, '/recipe');
+        } else {
+          ErrorUtil.showSnackBar(context, "Account created, but user is not signed in.");
+        }
+      } else {
+        ErrorUtil.showSnackBar(context, "Account created, but user is not signed in.");
       }
     } on FirebaseAuthException catch (e) {
       ErrorUtil.showSnackBar(context, ErrorUtil.getErrorMessage(e));
-    } //finally {
-      // setState(() {
-      //   _isLoading = false;
-      // });
-    //}
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _handleForgotPassword(String email) {

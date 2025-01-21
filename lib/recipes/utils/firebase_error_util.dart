@@ -30,6 +30,9 @@ class ErrorUtil {
       case 'invalid-credential':
         errorMessage = "That email isn't in our system. Please try again.";
         break;
+      case 'weak-password':
+        errorMessage = "The password is too weak. Please try again.";
+        break;
       default:
         errorMessage = "Oops, an undefined Error occured. Please try again in a few seconds.";
     }

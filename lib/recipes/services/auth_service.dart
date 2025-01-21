@@ -22,7 +22,6 @@ class AuthService {
   // TODO: Include a last name in the profile
   Future<UserCredential> createAccount(String email, String password, String firstName, String lastName, String phoneNumber) async {
     try {
-
       final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,

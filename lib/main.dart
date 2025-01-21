@@ -6,7 +6,7 @@ import 'portfolio_app/screens/home_screen.dart';
 import 'portfolio_app/models/app_data.dart';
 import 'portfolio_app/models/blackjack_data.dart';
 import 'portfolio_app/models/trivia_data.dart';
-import 'recipes/screens/recipie_home.dart';
+import 'recipes/screens/recipe_home.dart';
 import 'instagram/screens/insta_home.dart';
 import 'blackjack/screens/blackjack_home.dart';
 import 'blackjack/providers/game_provider.dart';
