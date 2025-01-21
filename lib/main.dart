@@ -73,5 +73,3 @@ class MyPortfolioApp extends StatelessWidget {
     );
   }
 }
-
-
