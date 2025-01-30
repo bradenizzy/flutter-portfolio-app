@@ -23,6 +23,7 @@ class Recipe {
   final String link; // Original source link
   final String author; // Author of the recipe
   final String source; // Source type (e.g., Instagram, Website)
+  final bool isPublic; // True if the recipe is public, false if private
 
   Recipe({
     required this.id,
@@ -48,6 +49,7 @@ class Recipe {
     required this.link,
     required this.author,
     required this.source,
+    this.isPublic = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -75,6 +77,7 @@ class Recipe {
       'link': link,
       'author': author,
       'source': source,
+      'isPublic': isPublic,
     };
   }
 
@@ -107,6 +110,7 @@ class Recipe {
       link: json['link'],
       author: json['author'],
       source: json['source'],
+      isPublic: json['isPublic'] ?? false,
     );
   }
 }

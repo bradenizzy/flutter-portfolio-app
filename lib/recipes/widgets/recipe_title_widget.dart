@@ -1,8 +1,17 @@
 // recipe_title_widget.dart
 
+//  FIRST TODO !!!!!!! TODO: IMPLEMENT RECIPE EDIT SCREEN !!!!!!!
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'image_selection_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
+//import 'package:flutter_portfolio_app/recipes/models/notes.dart';
+//import 'package:flutter_portfolio_app/recipes/models/nutrition.dart';
+//import 'package:flutter_portfolio_app/recipes/screens/recipe_edit_screen.dart';
 
 class RecipeTitleWidget extends StatefulWidget {
   final String source; // Source: Camera, Photos, or Manually
@@ -62,15 +71,99 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
     }
   }
 
-  void _handleSave() {
+  void _handleSave() async {
     if (_titleController.text.isEmpty) {
+      // Prompt user to enter a title
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter a recipe title')),
       );
-    } else {
-      print('Title: ${_titleController.text}');
-      print('Images: ${_selectedImages.map((img) => img.path).toList()}');
-      // TODO: Implement navigation to recipe creation page
+      return;
+    }
+
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(child: CircularProgressIndicator());
+      },
+    );
+
+    try {
+      // Generate unique recipe ID
+      final recipeId = FirebaseFirestore.instance.collection('recipes').doc().id;
+
+      String generateImageName() {
+        final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        return '${userId}_$timestamp.jpg';
+      }
+
+      // Upload images to Firebase Storage
+      List<String> imageUrls = [];
+      for (var image in _selectedImages) {
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('recipes/$recipeId/images/${generateImageName()}');
+        final uploadTask = await ref.putFile(image);
+        final imageUrl = await uploadTask.ref.getDownloadURL();
+        imageUrls.add(imageUrl);
+      }
+
+      // Prepare Recipe object
+      final recipe = Recipe(
+        id: recipeId,
+        images: imageUrls,
+        title: _titleController.text,
+        prepTime: '', // Placeholder for now
+        cookTime: '',
+        restTime: '',
+        totalTime: '',
+        rating: 0.0,
+        reviewsCount: 0,
+        servings: 0,
+        tags: [],
+        description: '',
+        ingredients: [],
+        ingredientsFormat: '',
+        equipment: [],
+        instructions: [],
+        notes: Notes(),
+        personalNotes: '',
+        nutrition: Nutrition(),
+        link: '',
+        author: FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown Author',
+        source: 'Custom',
+        isPublic: false,
+      );
+
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection('recipes')
+          .doc(recipeId)
+          .set(recipe.toJson());
+
+      // TODO: Integrate with OpenAI API
+      // Simulate sending images to OpenAI and processing JSON response
+      // This will be implemented in the future
+
+      // Close loading indicator
+      Navigator.of(context).pop();
+
+      // Navigate to Recipe Screen in "edit mode"
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => RecipeEditScreen(recipe: recipe),
+      //     // !!!!!!! TODO: IMPLEMENT RECIPE EDIT SCREEN !!!!!!!
+      //   ),
+      // );
+    } catch (e) {
+      // Handle errors
+      Navigator.of(context).pop(); // Close loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save recipe: $e')),
+      );
     }
   }
 
@@ -173,7 +266,7 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
             Spacer(),
             ElevatedButton(
               onPressed: _handleSave,
-              child: Text('Save'),
+              child: Text('Start Cooking'),
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(double.infinity, 50),
               ),
@@ -190,144 +283,3 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
     super.dispose();
   }
 }
-
-
-
-// import 'dart:io';
-// import 'package:flutter/material.dart';
-// import 'image_selection_widget.dart'; // Import your ImageSelectionWidget here
-
-// class RecipeTitleWidget extends StatefulWidget {
-//   final String source; // Source: Camera, Photos, or Manually
-
-//   const RecipeTitleWidget({Key? key, required this.source}) : super(key: key);
-
-//   @override
-//   _RecipeTitleWidgetState createState() => _RecipeTitleWidgetState();
-// }
-
-// class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
-//   final TextEditingController _titleController = TextEditingController();
-//   List<File> _selectedImages = [];
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     if (widget.source == 'Camera' || widget.source == 'Photos') {
-//       WidgetsBinding.instance.addPostFrameCallback((_) {
-//         _openImageSelector(); // Automatically open image selector on initialization
-//       });
-//     }
-//   }
-
-//   Future<void> _openImageSelector() async {
-//     final List<File>? images = await Navigator.push(
-//       context,
-//       MaterialPageRoute(
-//         builder: (_) => ImageSelectionWidget(
-//           onImagesSelected: (selectedImages) {
-//             setState(() {
-//               _selectedImages.addAll(selectedImages);
-//             });
-//           },
-//         ),
-//       ),
-//     );
-
-//     if (images != null) {
-//       setState(() {
-//         for (var image in images) {
-//           if (!_selectedImages.contains(image)) {
-//             _selectedImages.add(image); // Add only unique images
-//           }
-//         }
-//       });
-//     }
-//   }
-
-//   void _handleSave() {
-//     if (_titleController.text.isEmpty) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(content: Text('Please enter a recipe title')),
-//       );
-//     } else {
-//       // Proceed to the recipe creation page
-//       print('Title: ${_titleController.text}');
-//       print('Images: ${_selectedImages.map((img) => img.path).toList()}');
-//       // TODO: Implement navigation to recipe creation page
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: Text('New Recipe')),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             if (_selectedImages.isNotEmpty)
-//               SizedBox(
-//                 height: 150,
-//                 child: ListView.builder(
-//                   scrollDirection: Axis.horizontal,
-//                   itemCount: _selectedImages.length,
-//                   itemBuilder: (context, index) => Padding(
-//                     padding: const EdgeInsets.all(8.0),
-//                     child: Image.file(
-//                       _selectedImages[index],
-//                       height: 150,
-//                       width: 150,
-//                       fit: BoxFit.cover,
-//                     ),
-//                   ),
-//                 ),
-//               )
-//             else
-//               GestureDetector(
-//                 onTap: _openImageSelector,
-//                 child: Container(
-//                   height: 150,
-//                   width: double.infinity,
-//                   decoration: BoxDecoration(
-//                     color: Colors.grey[200],
-//                     borderRadius: BorderRadius.circular(8),
-//                   ),
-//                   child: Center(
-//                     child: Text(
-//                       widget.source == 'Photos' ? 'Choose a Photo' : 'Snap a Photo',
-//                       style: TextStyle(color: Colors.black54),
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             const SizedBox(height: 16),
-//             TextField(
-//               controller: _titleController,
-//               decoration: InputDecoration(
-//                 labelText: 'Recipe Name',
-//                 hintText: 'Enter recipe name',
-//                 border: OutlineInputBorder(),
-//               ),
-//             ),
-//             Spacer(),
-//             ElevatedButton(
-//               onPressed: _handleSave,
-//               child: Text('Save'),
-//               style: ElevatedButton.styleFrom(
-//                 minimumSize: Size(double.infinity, 50),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   @override
-//   void dispose() {
-//     _titleController.dispose();
-//     super.dispose();
-//   }
-// }
