@@ -1,6 +1,7 @@
 // recipe_title_widget.dart
 
-//  FIRST TODO !!!!!!! TODO: IMPLEMENT RECIPE EDIT SCREEN !!!!!!!
+//  THIRD TODO !!!!!!! TODO: IMPLEMENT OPENAI API !!!!!!!
+//  FOURTH TODO !!!!!!! TODO: IMPLEMENT MANUAL RECIPE CREATION !!!!!!!
 
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -9,9 +10,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
-//import 'package:flutter_portfolio_app/recipes/models/notes.dart';
-//import 'package:flutter_portfolio_app/recipes/models/nutrition.dart';
-//import 'package:flutter_portfolio_app/recipes/screens/recipe_edit_screen.dart';
+import 'package:flutter_portfolio_app/recipes/screens/recipe_edit_screen.dart';
 
 class RecipeTitleWidget extends StatefulWidget {
   final String source; // Source: Camera, Photos, or Manually
@@ -34,6 +33,8 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _openImageSelector();
       });
+    } else {
+      // TODO: Implement manual recipe creation
     }
   }
 
@@ -92,8 +93,8 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
     try {
       // Generate unique recipe ID
       final recipeId = FirebaseFirestore.instance.collection('recipes').doc().id;
-
-      String generateImageName() {
+      
+      String generateImageName() {  
         final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         return '${userId}_$timestamp.jpg';
@@ -150,14 +151,17 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
       // Close loading indicator
       Navigator.of(context).pop();
 
-      // Navigate to Recipe Screen in "edit mode"
-      // Navigator.push(
+      
+      // Navigate to RecipeEditScreen without allowing back navigation
+      // Navigator.pushReplacement(
       //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => RecipeEditScreen(recipe: recipe),
-      //     // !!!!!!! TODO: IMPLEMENT RECIPE EDIT SCREEN !!!!!!!
-      //   ),
+      //   MaterialPageRoute(builder: (context) => RecipeEditScreen(recipe: recipe)),
       // );
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => RecipeEditScreen(recipe: recipe)),
+        (route) => false, // Clears the stack
+      );
     } catch (e) {
       // Handle errors
       Navigator.of(context).pop(); // Close loading indicator

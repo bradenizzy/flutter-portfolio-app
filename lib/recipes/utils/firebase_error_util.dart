@@ -28,7 +28,7 @@ class ErrorUtil {
         errorMessage = "The email address is already in use by another account.";
         break;
       case 'invalid-credential':
-        errorMessage = "That email isn't in our system. Please try again.";
+        errorMessage = "That email/password combination isn't in our system. Please try again.";
         break;
       case 'weak-password':
         errorMessage = "The password is too weak. Please try again.";
