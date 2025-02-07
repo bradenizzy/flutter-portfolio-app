@@ -1,9 +1,18 @@
 // complete_recipe_screen.dart
 
+ // TODO: ADD PUBLIC IMAGES ATTRIBUTE TO RECIPE MODEL
+
 import 'package:flutter/material.dart';
+import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/overview_widget.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/more_details_widget.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/image_carousel_widget.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/ingredients_section/ingredients_widget.dart';
 
 class CompleteRecipeScreen extends StatefulWidget {
-  const CompleteRecipeScreen({Key? key}) : super(key: key);
+  
+  final Recipe recipe;
+  const CompleteRecipeScreen({required this.recipe});
 
   @override
   _CompleteRecipeScreenState createState() => _CompleteRecipeScreenState();
@@ -11,6 +20,7 @@ class CompleteRecipeScreen extends StatefulWidget {
 
 class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
   bool isEditMode = false; // Toggle between view and edit mode
+  final String publicImage = "https://firebasestorage.googleapis.com/v0/b/flutter-portfolio-app-izzy.firebasestorage.app/o/IMG_0405.JPG?alt=media&token=b2a29311-8940-4606-9214-07469a98cac6";
 
   @override
   Widget build(BuildContext context) {
@@ -34,23 +44,44 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Overview Section Placeholder
-              PlaceholderWidget(title: 'Overview Widget Placeholder'),
+              // Overview Widget
+              OverviewWidget(
+                title: widget.recipe.title,
+                totalCookTime: widget.recipe.totalTime,
+                rating: widget.recipe.rating,
+                reviewCount: widget.recipe.reviewsCount,
+              ),
 
               SizedBox(height: 16),
 
               // More Details Placeholder
-              PlaceholderWidget(title: 'More Details Placeholder'),
+              MoreDetailsWidget(
+                prepTime: widget.recipe.prepTime,
+                cookTime: widget.recipe.cookTime,
+                restTime: widget.recipe.restTime,
+                totalTime: widget.recipe.totalTime,
+                rating: widget.recipe.rating,
+                reviewsCount: widget.recipe.reviewsCount,
+                description: widget.recipe.description,
+              ),
 
               SizedBox(height: 16),
 
               // Image Carousel Placeholder
-              PlaceholderWidget(title: 'Image Carousel Placeholder'),
+              ImageCarouselWidget(
+                yourImages: widget.recipe.images,
+                publicImages: [publicImage, publicImage, publicImage, publicImage],
+                //publicImages: widget.recipe.publicImages, // TODO: ADD PUBLIC IMAGES ATTRIBUTE TO RECIPE MODEL
+              ),
 
               SizedBox(height: 16),
 
               // Ingredients Placeholder
-              PlaceholderWidget(title: 'Ingredients Placeholder'),
+              
+              IngredientsWidget(
+                isEditable: isEditMode,
+                ingredients: widget.recipe.ingredients,
+              ),
 
               SizedBox(height: 16),
 

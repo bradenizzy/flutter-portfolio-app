@@ -1,4 +1,6 @@
 // recipe.dart
+
+// TODO: ADD PUBLIC ATTRIBUTES TO RECIPE MODEL (e.g. publicImages, ... )
 class Recipe {
   final String id; // Unique ID for the recipe
   final List<String> images; // URLs for recipe images
@@ -196,6 +198,7 @@ class Notes {
       'storage': storage,
       'makeAheadMethod': makeAheadMethod,
       'reheatingLeftovers': reheatingLeftovers,
+      'other': other,
     };
   }
 
@@ -205,6 +208,7 @@ class Notes {
       storage: json['storage'] ?? "",
       makeAheadMethod: json['makeAheadMethod'] ?? "",
       reheatingLeftovers: json['reheatingLeftovers'] ?? "",
+      other: json['other'] ?? "",
     );
   }
 }

@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
                 SizedBox(height: 16),
                 ToAppButtonWidget(
-                  appName: 'Instagram Education App',
+                  appName: 'Health & Wellness App',
                   routeName: '/instagram',
                 ),
                 SizedBox(height: 16),

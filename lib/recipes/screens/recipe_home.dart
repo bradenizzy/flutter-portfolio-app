@@ -19,6 +19,12 @@ class RecipieHome extends StatelessWidget {
               child: Text('Go to Chef Assistant'),
             ),
             NewRecipeButton(context: context),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/complete_recipe');
+              },
+              child: Text('Completed Recipe Screen'),
+            ),
           ],
         ),
       ),
