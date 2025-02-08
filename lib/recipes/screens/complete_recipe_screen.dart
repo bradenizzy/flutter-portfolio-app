@@ -10,7 +10,7 @@ import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/imag
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/ingredients_section/ingredients_widget.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/equipment_widget.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/instructions_widget.dart';
-
+import 'package:flutter_portfolio_app/recipes/utils/instruction_callbacks.dart';
 class CompleteRecipeScreen extends StatefulWidget {
   
   final Recipe recipe;
@@ -112,42 +112,18 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
               InstructionsWidget(
                 instructions: widget.recipe.instructions,
                 isEditable: isEditMode,
-                onSectionTitleChanged: (sectionIndex, newTitle) {
-                  setState(() {
-                    widget.recipe.instructions[sectionIndex] = InstructionSection(
-                      sectionTitle: newTitle,
-                      steps: widget.recipe.instructions[sectionIndex].steps,
-                    );
-                  });
-                },
-                onStepChanged: (sectionIndex, stepIndex, newStep) {
-                  setState(() {
-                    widget.recipe.instructions[sectionIndex].steps[stepIndex] = newStep;
-                  });
-                },
-                onDeleteSection: (sectionIndex) {
-                  setState(() {
-                    widget.recipe.instructions.removeAt(sectionIndex);
-                  });
-                },
-                onDeleteStep: (sectionIndex, stepIndex) {
-                  setState(() {
-                    widget.recipe.instructions[sectionIndex].steps.removeAt(stepIndex);
-                  });
-                },
-                onAddSection: () {
-                  setState(() {
-                    widget.recipe.instructions.add(InstructionSection(
-                      sectionTitle: 'New Section',
-                      steps: ['New Step'],
-                    ));
-                  });
-                },
-                onAddStep: (sectionIndex) {
-                  setState(() {
-                    widget.recipe.instructions[sectionIndex].steps.add('New Step');
-                  });
-                },
+                onSectionTitleChanged: (sectionIndex, newTitle) => 
+                    InstructionCallbacks.updateSectionTitle(widget.recipe, setState, sectionIndex, newTitle),
+                onStepChanged: (sectionIndex, stepIndex, newStep) =>
+                    InstructionCallbacks.updateStep(widget.recipe, setState, sectionIndex, stepIndex, newStep),
+                onDeleteSection: (sectionIndex) =>
+                    InstructionCallbacks.deleteSection(widget.recipe, setState, sectionIndex),
+                onDeleteStep: (sectionIndex, stepIndex) =>
+                    InstructionCallbacks.deleteStep(widget.recipe, setState, sectionIndex, stepIndex),
+                onAddSection: () =>
+                    InstructionCallbacks.addSection(widget.recipe, setState),
+                onAddStep: (sectionIndex) =>
+                    InstructionCallbacks.addStep(widget.recipe, setState, sectionIndex),
               ),
 
               SizedBox(height: 16),
