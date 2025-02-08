@@ -173,7 +173,6 @@ class InstructionSection {
       steps: List<String>.from(json['steps']),
     );
   }
-
 }
 
 

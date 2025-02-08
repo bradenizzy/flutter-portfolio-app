@@ -54,9 +54,9 @@ class _TopRowWidgetState extends State<TopRowWidget> {
               onPressed: _openScalingPicker,
             ),
             IconButton(
-              icon: const Icon(Icons.edit),
+              icon: const Icon(Icons.shopping_cart),
               onPressed: () {
-                // Handle edit action TODO: ADD EDIT ACTION
+                // TODO: ADD INGREDIENTS TO A SHOPPING LIST
               },
             ),
           ],

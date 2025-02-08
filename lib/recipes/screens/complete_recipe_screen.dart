@@ -8,6 +8,8 @@ import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/over
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/more_details_widget.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/image_carousel_widget.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/ingredients_section/ingredients_widget.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/equipment_widget.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/instructions_widget.dart';
 
 class CompleteRecipeScreen extends StatefulWidget {
   
@@ -28,12 +30,29 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
       appBar: AppBar(
         title: Text('Recipe'),
         actions: [
+          if (isEditMode)
+            IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () {
+                setState(() {
+                  isEditMode = false; // Cancel edit mode
+                });
+              },
+            ),
           IconButton(
             icon: Icon(isEditMode ? Icons.save : Icons.edit),
             onPressed: () {
-              setState(() {
-                isEditMode = !isEditMode; // Toggle edit mode
-              });
+              if (isEditMode) {
+                // TODO: SAVE THE RECIPE CHANGES. 
+                // TODO: ADD A CONFIRMATION DIALOG TO SAVE THE RECIPE CHANGES.
+                setState(() {
+                  isEditMode = false;
+                });
+              } else {
+                setState(() {
+                  isEditMode = true;
+                });
+              }
             },
           ),
         ],
@@ -76,8 +95,7 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
 
               SizedBox(height: 16),
 
-              // Ingredients Placeholder
-              
+              //Ingredients
               IngredientsWidget(
                 isEditable: isEditMode,
                 ingredients: widget.recipe.ingredients,
@@ -85,13 +103,52 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
 
               SizedBox(height: 16),
 
-              // Equipment Placeholder
-              PlaceholderWidget(title: 'Equipment Placeholder'),
+              // Equipment 
+              EquipmentWidget(equipment: widget.recipe.equipment),
 
               SizedBox(height: 16),
 
-              // Instructions Placeholder
-              PlaceholderWidget(title: 'Instructions Placeholder'),
+              // Instructions
+              InstructionsWidget(
+                instructions: widget.recipe.instructions,
+                isEditable: isEditMode,
+                onSectionTitleChanged: (sectionIndex, newTitle) {
+                  setState(() {
+                    widget.recipe.instructions[sectionIndex] = InstructionSection(
+                      sectionTitle: newTitle,
+                      steps: widget.recipe.instructions[sectionIndex].steps,
+                    );
+                  });
+                },
+                onStepChanged: (sectionIndex, stepIndex, newStep) {
+                  setState(() {
+                    widget.recipe.instructions[sectionIndex].steps[stepIndex] = newStep;
+                  });
+                },
+                onDeleteSection: (sectionIndex) {
+                  setState(() {
+                    widget.recipe.instructions.removeAt(sectionIndex);
+                  });
+                },
+                onDeleteStep: (sectionIndex, stepIndex) {
+                  setState(() {
+                    widget.recipe.instructions[sectionIndex].steps.removeAt(stepIndex);
+                  });
+                },
+                onAddSection: () {
+                  setState(() {
+                    widget.recipe.instructions.add(InstructionSection(
+                      sectionTitle: 'New Section',
+                      steps: ['New Step'],
+                    ));
+                  });
+                },
+                onAddStep: (sectionIndex) {
+                  setState(() {
+                    widget.recipe.instructions[sectionIndex].steps.add('New Step');
+                  });
+                },
+              ),
 
               SizedBox(height: 16),
 
