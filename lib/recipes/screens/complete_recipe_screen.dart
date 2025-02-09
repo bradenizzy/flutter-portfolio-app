@@ -11,6 +11,10 @@ import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/ingr
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/equipment_widget.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/instructions_widget.dart';
 import 'package:flutter_portfolio_app/recipes/utils/instruction_callbacks.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/notes_widget.dart';
+import '../utils/notes_callbacks.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/nutrition_widget.dart';
+
 class CompleteRecipeScreen extends StatefulWidget {
   
   final Recipe recipe;
@@ -128,13 +132,28 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
 
               SizedBox(height: 16),
 
-              // Notes Placeholder
-              PlaceholderWidget(title: 'Notes Placeholder'),
+              // Notes
+              NotesWidget(
+                notes: widget.recipe.notes,
+                isEditable: isEditMode,
+                onNoteChanged: (section, noteIndex, value) {
+                  NotesCallbacks.updateNote(widget.recipe, setState, section, noteIndex, value);
+                },
+                onNoteDeleted: (section, noteIndex) {
+                  NotesCallbacks.deleteNote(widget.recipe, setState, section, noteIndex);
+                },
+                onNoteAdded: (section) {
+                  NotesCallbacks.addNote(widget.recipe, setState, section);
+                },
+              ),
 
               SizedBox(height: 16),
 
-              // Nutrition Placeholder
-              PlaceholderWidget(title: 'Nutrition Placeholder'),
+              // Nutrition 
+              NutritionWidget(
+                // TODO: MAKE NUTRITION VALUES EDITABLE!!!
+                nutrition: widget.recipe.nutrition,
+              ),
 
               SizedBox(height: 16),
 

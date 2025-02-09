@@ -90,13 +90,13 @@ class MyPortfolioApp extends StatelessWidget {
               equipment: ['equipment1', 'equipment2'],
               instructions: [InstructionSection(sectionTitle: 'instruction_title_1', steps: ['instruction1', 'instruction2', 'instruction3'])],
               notes: Notes(
+                personalNotes: 'personal_notes_1',
                 proTips: 'pro_tip_1',
                 storage: 'storage_1',
                 makeAheadMethod: 'make_ahead_method_1',
                 reheatingLeftovers: 'reheating_leftovers_1',
                 other: 'other_1',
               ),
-              personalNotes: 'personal_notes_1',
               nutrition: Nutrition(
                 calories: 100,
                 fat: 10,

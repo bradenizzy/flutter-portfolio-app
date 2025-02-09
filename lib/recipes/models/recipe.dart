@@ -19,9 +19,8 @@ class Recipe {
   final String ingredientsFormat; // Format (e.g., US Customary, Metric)
   final List<String> equipment; // List of equipment needed
   final List<InstructionSection> instructions; // Instructions (divided into sections if applicable)
-  final Notes notes; // Notes for the recipe
-  final String personalNotes; // User-added personal notes
-  final Nutrition nutrition; // Nutrition details
+  Notes notes; // Notes for the recipe
+  Nutrition nutrition; // Nutrition details
   final String link; // Original source link
   final String author; // Author of the recipe
   final String source; // Source type (e.g., Instagram, Website)
@@ -46,7 +45,6 @@ class Recipe {
     required this.equipment,
     required this.instructions,
     required this.notes,
-    this.personalNotes = "",
     required this.nutrition,
     required this.link,
     required this.author,
@@ -74,7 +72,6 @@ class Recipe {
       'equipment': equipment,
       'instructions': instructions.map((i) => i.toJson()).toList(),
       'notes': notes.toJson(),
-      'personalNotes': personalNotes,
       'nutrition': nutrition.toJson(),
       'link': link,
       'author': author,
@@ -107,13 +104,17 @@ class Recipe {
           .map((i) => InstructionSection.fromJson(i))
           .toList(),
       notes: Notes.fromJson(json['notes']),
-      personalNotes: json['personalNotes'] ?? "",
       nutrition: Nutrition.fromJson(json['nutrition']),
       link: json['link'],
       author: json['author'],
       source: json['source'],
       isPublic: json['isPublic'] ?? false,
     );
+  }
+
+  // Add a method to update notes
+  void updateNotes(Notes newNotes) {
+    notes = newNotes;
   }
 }
 
@@ -177,6 +178,7 @@ class InstructionSection {
 
 
 class Notes {
+  final String personalNotes; // User-added personal notes
   final String proTips;
   final String storage;
   final String makeAheadMethod;
@@ -184,6 +186,7 @@ class Notes {
   final String other;
 
   Notes({
+    this.personalNotes = "",
     this.proTips = "",
     this.storage = "",
     this.makeAheadMethod = "",
@@ -193,6 +196,7 @@ class Notes {
 
   Map<String, dynamic> toJson() {
     return {
+      'personalNotes': personalNotes,
       'proTips': proTips,
       'storage': storage,
       'makeAheadMethod': makeAheadMethod,
@@ -203,6 +207,7 @@ class Notes {
 
   factory Notes.fromJson(Map<String, dynamic> json) {
     return Notes(
+      personalNotes: json['personalNotes'] ?? "",
       proTips: json['proTips'] ?? "",
       storage: json['storage'] ?? "",
       makeAheadMethod: json['makeAheadMethod'] ?? "",
@@ -213,17 +218,20 @@ class Notes {
 }
 
 class Nutrition {
-  //TODO: add more fields
-  final int calories; // Total calories
-  final double fat; // Fat content in grams
-  final double protein; // Protein content in grams
-  final double carbs; // Carbohydrate content in grams
+  final int? calories; // Total calories
+  final double? fat; // Fat content in grams
+  final double? protein; // Protein content in grams
+  final double? carbs; // Carbohydrate content in grams
+  final double? sugar; // Sugar content in grams
+  final double? fiber; // Fiber content in grams
 
   Nutrition({
-    this.calories = 0,
-    this.fat = 0.0,
-    this.protein = 0.0,
-    this.carbs = 0.0,
+    this.calories,
+    this.fat,
+    this.protein,
+    this.carbs,
+    this.sugar,
+    this.fiber,
   });
 
   Map<String, dynamic> toJson() {
@@ -232,15 +240,19 @@ class Nutrition {
       'fat': fat,
       'protein': protein,
       'carbs': carbs,
+      'sugar': sugar,
+      'fiber': fiber,
     };
   }
 
   factory Nutrition.fromJson(Map<String, dynamic> json) {
     return Nutrition(
-      calories: json['calories'] ?? 0,
-      fat: json['fat']?.toDouble() ?? 0.0,
-      protein: json['protein']?.toDouble() ?? 0.0,
-      carbs: json['carbs']?.toDouble() ?? 0.0,
+      calories: json['calories'],
+      fat: json['fat']?.toDouble(),
+      protein: json['protein']?.toDouble(),
+      carbs: json['carbs']?.toDouble(),
+      sugar: json['sugar']?.toDouble(),
+      fiber: json['fiber']?.toDouble(),
     );
   }
 }

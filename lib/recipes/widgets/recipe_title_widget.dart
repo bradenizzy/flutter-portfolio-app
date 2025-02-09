@@ -130,7 +130,6 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
         equipment: [],
         instructions: [],
         notes: Notes(),
-        personalNotes: '',
         nutrition: Nutrition(),
         link: '',
         author: FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown Author',
