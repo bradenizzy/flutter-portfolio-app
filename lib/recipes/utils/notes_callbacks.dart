@@ -7,7 +7,7 @@ class NotesCallbacks {
     setState(() {
       List<String> notes = _getNotesList(recipe, section);
       notes[noteIndex] = value;
-      _updateRecipeNotes(recipe, section, notes);
+      _updateRecipeNotes(recipe, section, List<String>.from(notes));
     });
   }
 
@@ -15,7 +15,7 @@ class NotesCallbacks {
     setState(() {
       List<String> notes = _getNotesList(recipe, section);
       notes.removeAt(noteIndex);
-      _updateRecipeNotes(recipe, section, notes);
+      _updateRecipeNotes(recipe, section, List<String>.from(notes));
     });
   }
 
@@ -23,31 +23,30 @@ class NotesCallbacks {
     setState(() {
       List<String> notes = _getNotesList(recipe, section);
       notes.add('');
-      _updateRecipeNotes(recipe, section, notes);
+      _updateRecipeNotes(recipe, section, List<String>.from(notes));
     });
   }
 
   static List<String> _getNotesList(Recipe recipe, String section) {
-    String notesText = switch (section) {
+    return switch (section) {
       'personalNotes' => recipe.notes.personalNotes,
       'proTips' => recipe.notes.proTips,
       'storage' => recipe.notes.storage,
       'makeAheadMethod' => recipe.notes.makeAheadMethod,
       'reheatingLeftovers' => recipe.notes.reheatingLeftovers,
       'other' => recipe.notes.other,
-      _ => '',
+      _ => [],
     };
-    return notesText.split('\n');
   }
 
   static void _updateRecipeNotes(Recipe recipe, String section, List<String> notes) {
     final updatedNotes = Notes(
-      personalNotes: section == 'personalNotes' ? notes.join('\n') : recipe.notes.personalNotes,
-      proTips: section == 'proTips' ? notes.join('\n') : recipe.notes.proTips,
-      storage: section == 'storage' ? notes.join('\n') : recipe.notes.storage,
-      makeAheadMethod: section == 'makeAheadMethod' ? notes.join('\n') : recipe.notes.makeAheadMethod,
-      reheatingLeftovers: section == 'reheatingLeftovers' ? notes.join('\n') : recipe.notes.reheatingLeftovers,
-      other: section == 'other' ? notes.join('\n') : recipe.notes.other,
+      personalNotes: section == 'personalNotes' ? notes : recipe.notes.personalNotes,
+      proTips: section == 'proTips' ? notes : recipe.notes.proTips,
+      storage: section == 'storage' ? notes : recipe.notes.storage,
+      makeAheadMethod: section == 'makeAheadMethod' ? notes : recipe.notes.makeAheadMethod,
+      reheatingLeftovers: section == 'reheatingLeftovers' ? notes : recipe.notes.reheatingLeftovers,
+      other: section == 'other' ? notes : recipe.notes.other,
     );
     recipe.notes = updatedNotes;
   }

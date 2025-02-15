@@ -41,11 +41,10 @@ class _NotesWidgetState extends State<NotesWidget> {
   }
 
   /// Initialize each notes section with a list of TextControllers,
-  /// one controller per line of text.
+  /// one controller per note in the list.
   void _initializeControllers() {
     _noteControllers = {};
     for (var section in _sectionTitles.keys) {
-      // Split the notes into lines (including empty lines).
       List<String> notes = _getNotes(section);
       _noteControllers[section] = notes
           .map((note) => TextEditingController(text: note))
@@ -53,19 +52,17 @@ class _NotesWidgetState extends State<NotesWidget> {
     }
   }
 
-  /// Return the lines of text for a given section without filtering out empties.
+  /// Return the list of notes for a given section
   List<String> _getNotes(String section) {
-    String notesText = switch (section) {
+    return switch (section) {
       'personalNotes' => widget.notes.personalNotes,
       'proTips' => widget.notes.proTips,
       'storage' => widget.notes.storage,
       'makeAheadMethod' => widget.notes.makeAheadMethod,
       'reheatingLeftovers' => widget.notes.reheatingLeftovers,
       'other' => widget.notes.other,
-      _ => '',
+      _ => [],
     };
-    // Split on newline, preserve empty lines
-    return notesText.split('\n');
   }
 
   /// IMPORTANT: Do NOT rebuild controllers on every new widget update,

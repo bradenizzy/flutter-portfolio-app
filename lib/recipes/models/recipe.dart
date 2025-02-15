@@ -178,20 +178,20 @@ class InstructionSection {
 
 
 class Notes {
-  final String personalNotes; // User-added personal notes
-  final String proTips;
-  final String storage;
-  final String makeAheadMethod;
-  final String reheatingLeftovers;
-  final String other;
+  final List<String> personalNotes; // User-added personal notes
+  final List<String> proTips;
+  final List<String> storage;
+  final List<String> makeAheadMethod;
+  final List<String> reheatingLeftovers;
+  final List<String> other;
 
   Notes({
-    this.personalNotes = "",
-    this.proTips = "",
-    this.storage = "",
-    this.makeAheadMethod = "",
-    this.reheatingLeftovers = "",
-    this.other = "",
+    this.personalNotes = const [],
+    this.proTips = const [],
+    this.storage = const [],
+    this.makeAheadMethod = const [],
+    this.reheatingLeftovers = const [],
+    this.other = const [],
   });
 
   Map<String, dynamic> toJson() {
@@ -207,18 +207,18 @@ class Notes {
 
   factory Notes.fromJson(Map<String, dynamic> json) {
     return Notes(
-      personalNotes: json['personalNotes'] ?? "",
-      proTips: json['proTips'] ?? "",
-      storage: json['storage'] ?? "",
-      makeAheadMethod: json['makeAheadMethod'] ?? "",
-      reheatingLeftovers: json['reheatingLeftovers'] ?? "",
-      other: json['other'] ?? "",
+      personalNotes: List<String>.from(json['personalNotes'] ?? []),
+      proTips: List<String>.from(json['proTips'] ?? []),
+      storage: List<String>.from(json['storage'] ?? []),
+      makeAheadMethod: List<String>.from(json['makeAheadMethod'] ?? []),
+      reheatingLeftovers: List<String>.from(json['reheatingLeftovers'] ?? []),
+      other: List<String>.from(json['other'] ?? []),
     );
   }
 }
 
 class Nutrition {
-  final int? calories; // Total calories
+  final double? calories; // Total calories
   final double? fat; // Fat content in grams
   final double? protein; // Protein content in grams
   final double? carbs; // Carbohydrate content in grams

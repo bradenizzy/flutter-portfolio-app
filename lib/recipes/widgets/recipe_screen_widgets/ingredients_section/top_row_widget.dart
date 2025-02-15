@@ -4,54 +4,51 @@ import 'package:flutter/material.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/ingredients_section/scaling_ingredients_widget.dart';
 
 
-class TopRowWidget extends StatefulWidget {
-  @override
-  _TopRowWidgetState createState() => _TopRowWidgetState();
-}
+class TopRowWidget extends StatelessWidget {
+  final double servings;
+  final double scalingMultiplier;
+  final Function(double) onScalingChanged;
 
-class _TopRowWidgetState extends State<TopRowWidget> {
-  double _scalingMultiplier = 1.0; // Default multiplier
+  const TopRowWidget({
+    Key? key, 
+    required this.servings,
+    required this.scalingMultiplier,
+    required this.onScalingChanged,
+  }) : super(key: key);
 
-  void _openScalingPicker() {
+  void _openScalingPicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Ensure full visibility
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) => ScalingPickerOverlay(
-        currentMultiplier: _scalingMultiplier,
-        onDone: (double multiplier) {
-          setState(() {
-            _scalingMultiplier = multiplier;
-          });
-        },
-        onRevert: () {
-          setState(() {
-            _scalingMultiplier = 1.0;
-          });
-        },
+        currentMultiplier: scalingMultiplier,
+        onDone: onScalingChanged,
+        onRevert: () => onScalingChanged(1.0),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Format the multiplier to show at most 2 decimal places and remove trailing zeros
-    String formattedMultiplier = _scalingMultiplier.toStringAsFixed(2).replaceAll(RegExp(r'\.?0*$'), '');
+    // Calculate scaled servings
+    double scaledServings = servings * scalingMultiplier;
+    String formattedServings = scaledServings.toStringAsFixed(2).replaceAll(RegExp(r'\.?0*$'), '');
     
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "Ingredients for $formattedMultiplier servings",
+          "Ingredients for $formattedServings servings",
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         Row(
           children: [
             IconButton(
               icon: const Icon(Icons.scale),
-              onPressed: _openScalingPicker,
+              onPressed: () => _openScalingPicker(context),
             ),
             IconButton(
               icon: const Icon(Icons.shopping_cart),

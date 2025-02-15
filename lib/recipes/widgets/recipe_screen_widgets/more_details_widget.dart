@@ -6,9 +6,6 @@ class MoreDetailsWidget extends StatefulWidget {
   final String prepTime;
   final String cookTime;
   final String restTime;
-  final String totalTime;
-  final double rating;
-  final int reviewsCount;
   final String? description; // Optional description or AI summary.
 
   const MoreDetailsWidget({
@@ -16,9 +13,6 @@ class MoreDetailsWidget extends StatefulWidget {
     required this.prepTime,
     required this.cookTime,
     required this.restTime,
-    required this.totalTime,
-    required this.rating,
-    required this.reviewsCount,
     this.description,
   }) : super(key: key);
 
@@ -65,22 +59,13 @@ class _MoreDetailsWidgetState extends State<MoreDetailsWidget> {
               _buildDetailRow(Icons.timer, "Prep Time", widget.prepTime),
               _buildDetailRow(Icons.restaurant, "Cook Time", widget.cookTime),
               _buildDetailRow(Icons.hourglass_empty, "Rest Time", widget.restTime),
-              _buildDetailRow(Icons.schedule, "Total Time", widget.totalTime),
-              Row(
-                children: [
-                  Icon(Icons.star, color: Colors.amber, size: 20),
-                  const SizedBox(width: 4),
-                  Text("${widget.rating} / ${widget.reviewsCount} reviews"),
-                ],
-              ),
-              if (widget.description != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    widget.description!,
-                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                  ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  widget.description ?? "No description available",
+                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                 ),
+              ),
             ],
           ),
         ),
