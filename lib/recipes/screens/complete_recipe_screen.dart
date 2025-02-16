@@ -1,6 +1,11 @@
 // complete_recipe_screen.dart
 
+ // DELETE CALLBACK FUNCTIONS?
+ // IMPLEMENT GRANULAR EDITING CAPABILITIES FOR EACH WIDGET
+ // TEST EDITING CAPABILITIES
+
  // TODO: ADD PUBLIC IMAGES ATTRIBUTE TO RECIPE MODEL
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
