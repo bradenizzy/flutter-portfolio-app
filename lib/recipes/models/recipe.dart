@@ -111,10 +111,57 @@ class Recipe {
       isPublic: json['isPublic'] ?? false,
     );
   }
-
-  // Add a method to update notes
-  void updateNotes(Notes newNotes) {
-    notes = newNotes;
+  
+  Recipe copyWith({
+    String? id,
+    List<String>? images,
+    String? title,
+    String? prepTime,
+    String? cookTime,
+    String? restTime,
+    String? totalTime,
+    double? rating,
+    int? reviewsCount,
+    int? servings,
+    String? servingsUnit,
+    List<String>? tags,
+    String? description,
+    List<Ingredient>? ingredients,
+    String? ingredientsFormat,
+    List<String>? equipment,
+    List<InstructionSection>? instructions,
+    Notes? notes,
+    Nutrition? nutrition,
+    String? link,
+    String? author,
+    String? source,
+    bool? isPublic,
+  }) {
+    return Recipe(
+      id: id ?? this.id,
+      images: images ?? this.images,
+      title: title ?? this.title,
+      prepTime: prepTime ?? this.prepTime,
+      cookTime: cookTime ?? this.cookTime,
+      restTime: restTime ?? this.restTime,
+      totalTime: totalTime ?? this.totalTime,
+      rating: rating ?? this.rating,
+      reviewsCount: reviewsCount ?? this.reviewsCount,
+      servings: servings ?? this.servings,
+      servingsUnit: servingsUnit ?? this.servingsUnit,
+      tags: tags ?? this.tags,
+      description: description ?? this.description,
+      ingredients: ingredients ?? this.ingredients,
+      ingredientsFormat: ingredientsFormat ?? this.ingredientsFormat,
+      equipment: equipment ?? this.equipment,
+      instructions: instructions ?? this.instructions,
+      notes: notes ?? this.notes,
+      nutrition: nutrition ?? this.nutrition,
+      link: link ?? this.link,
+      author: author ?? this.author,
+      source: source ?? this.source,
+      isPublic: isPublic ?? this.isPublic,
+    );
   }
 }
 
