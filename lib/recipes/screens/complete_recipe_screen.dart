@@ -21,6 +21,8 @@ import '../utils/notes_callbacks.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/nutrition_widget.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/tags_widget.dart';
 import 'package:flutter_portfolio_app/recipes/services/recipe_service.dart';
+
+
 class CompleteRecipeScreen extends StatefulWidget {
   
   final Recipe recipe;
@@ -35,31 +37,22 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
   bool isEditMode = false;
   late Recipe recipe;
   bool isLoading = true;
+  final RecipeService recipeService = RecipeService();
 
   @override
   void initState() {
     super.initState();
-    _loadRecipe();
-  }
-
-  Future<void> _loadRecipe() async {
-    setState(() => isLoading = true);
-    try {
-      recipe = await fetchRecipe(widget.recipe.id);
-    } catch (e) {
-      print(e);
-    }
-    setState(() => isLoading = false);
+    recipe = widget.recipe; // ✅ Assign the passed-in recipe directly
   }
 
   Future<void> _saveRecipe() async {
-    await RecipeService().updateRecipe(recipe);
-    _loadRecipe();
+    await recipeService.updateRecipe(recipe);
+    setState(() {});
   }
 
   void _toggleEditMode() {
     if (isEditMode) {
-      showDiscardChangesDialog(context, () {
+      recipeService.showDiscardChangesDialog(context, () {
         setState(() => isEditMode = false);
       });
     } else {
@@ -69,9 +62,6 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
     return Scaffold(
       appBar: AppBar(
         title: Text('Recipe'),
@@ -135,6 +125,14 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
               ),
               SizedBox(height: 16),
               TagsWidget(tags: recipe.tags),
+              SizedBox(height: 16),
+              // Related Recipes Placeholder
+              PlaceholderWidget(title: 'Related Recipes Placeholder'),
+
+              SizedBox(height: 16),
+
+              // Comments Placeholder
+              PlaceholderWidget(title: 'Comments Placeholder'),
             ],
           ),
         ),
@@ -299,27 +297,27 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
 //   }
 // }
 
-// /// A simple widget to act as a placeholder for sections
-// class PlaceholderWidget extends StatelessWidget {
-//   final String title;
+/// A simple widget to act as a placeholder for sections
+class PlaceholderWidget extends StatelessWidget {
+  final String title;
 
-//   const PlaceholderWidget({Key? key, required this.title}) : super(key: key);
+  const PlaceholderWidget({Key? key, required this.title}) : super(key: key);
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: double.infinity,
-//       padding: const EdgeInsets.all(16.0),
-//       decoration: BoxDecoration(
-//         border: Border.all(color: Colors.grey),
-//         borderRadius: BorderRadius.circular(8.0),
-//       ),
-//       child: Center(
-//         child: Text(
-//           title,
-//           style: TextStyle(color: Colors.grey, fontSize: 16),
-//         ),
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Center(
+        child: Text(
+          title,
+          style: TextStyle(color: Colors.grey, fontSize: 16),
+        ),
+      ),
+    );
+  }
+}

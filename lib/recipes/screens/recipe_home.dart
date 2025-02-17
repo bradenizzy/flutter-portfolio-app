@@ -1,8 +1,12 @@
 // recipie_home.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/new_recipe_button.dart';
+import 'package:flutter_portfolio_app/recipes/services/recipe_service.dart';
+import 'package:flutter_portfolio_app/recipes/screens/complete_recipe_screen.dart';
+import 'package:flutter_portfolio_app/recipes/screens/loading_screen.dart';
 
 class RecipieHome extends StatelessWidget {
+  final RecipeService recipeService = RecipeService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,8 +24,22 @@ class RecipieHome extends StatelessWidget {
             ),
             NewRecipeButton(context: context),
             ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/complete_recipe');
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoadingScreen(),
+                  ),
+                );
+                
+                final recipe = await recipeService.fetchRecipe("testing_complete_recipe");
+                
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CompleteRecipeScreen(recipe: recipe),
+                  ),
+                );
               },
               child: Text('Completed Recipe Screen'),
             ),

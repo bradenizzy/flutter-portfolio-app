@@ -247,12 +247,12 @@ class Nutrition {
 
   factory Nutrition.fromJson(Map<String, dynamic> json) {
     return Nutrition(
-      calories: json['calories'],
-      fat: json['fat']?.toDouble(),
-      protein: json['protein']?.toDouble(),
-      carbs: json['carbs']?.toDouble(),
-      sugar: json['sugar']?.toDouble(),
-      fiber: json['fiber']?.toDouble(),
+      calories: json['calories'] != null ? (json['calories'] as num).toDouble() : null,
+      fat: json['fat'] != null ? (json['fat'] as num).toDouble() : null,
+      protein: json['protein'] != null ? (json['protein'] as num).toDouble() : null,
+      carbs: json['carbs'] != null ? (json['carbs'] as num).toDouble() : null,
+      sugar: json['sugar'] != null ? (json['sugar'] as num).toDouble() : null,
+      fiber: json['fiber'] != null ? (json['fiber'] as num).toDouble() : null,
     );
   }
 }

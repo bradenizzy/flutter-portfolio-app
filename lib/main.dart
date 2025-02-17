@@ -25,6 +25,7 @@ import 'package:flutter/rendering.dart';
 import 'recipes/screens/sign_in_screen.dart';
 import 'recipes/screens/complete_recipe_screen.dart';
 import 'recipes/models/recipe.dart';
+import 'recipes/services/recipe_service.dart';
 
 
 void main() async {
@@ -47,7 +48,8 @@ void main() async {
 }
 
 class MyPortfolioApp extends StatelessWidget {
-  const MyPortfolioApp({super.key});
+  MyPortfolioApp({super.key});
+  final RecipeService recipeService = RecipeService();
 
   @override
   Widget build(BuildContext context) {
@@ -72,43 +74,44 @@ class MyPortfolioApp extends StatelessWidget {
           '/game_results': (context) => GameResultsScreen(),
           '/chef_chat': (context) => ChefChatScreen(),
           '/sign_in': (context) => SignInScreen(),
-          '/complete_recipe': (context) => CompleteRecipeScreen(recipe: Recipe(
-              id: "testing recipe ID",
-              images: ["https://firebasestorage.googleapis.com/v0/b/flutter-portfolio-app-izzy.firebasestorage.app/o/recipes%2FhTY4sxdEjHHqT1ovr1Cd%2Fimages%2FFIuScrERXbbGVdEhLhfBxsAI74y2_1738438945277.jpg?alt=media&token=215846ab-1003-4449-922b-c17fd3e54f48"],
-              title: "Title",
-              prepTime: '10 minutes',
-              cookTime: '15 minutes',
-              restTime: '20 minutes',
-              totalTime: '45 minutes',
-              rating: 4.5,
-              reviewsCount: 130,
-              servings: 10,
-              tags: ['tag1', 'tag2', 'tag3', 'tag1', 'tag2', 'tag3', 'tag1', 'tag2', 'tag3'],
-              description: 'This is a description of the recipe',
-              ingredients: [Ingredient(name: 'ingredient1', quantity: '1', unit: 'unit'), Ingredient(name: 'ingredient2', quantity: '2', unit: 'unit')],
-              ingredientsFormat: 'US',
-              equipment: ['equipment1', 'equipment2'],
-              instructions: [InstructionSection(sectionTitle: 'instruction_title_1', steps: ['instruction1', 'instruction2', 'instruction3'])],
-              notes: Notes(
-                personalNotes: ['personal_notes_1'],
-                proTips: ['pro_tip_1'],
-                storage: ['storage_1'],
-                makeAheadMethod: ['make_ahead_method_1'],
-                reheatingLeftovers: ['reheating_leftovers_1'],
-                other: ['other_1'],
-              ),
-              nutrition: Nutrition(
-                calories: 100,
-                fat: 10,
-                protein: 10,
-                carbs: 10,
-              ),
-              link: 'https://www.google.com',
-              author: 'Unknown Author',
-              source: 'Custom',
-              isPublic: false,
-            )
-          ),
+          //'/complete_recipe': (context) => CompleteRecipeScreen(  
+          //recipe: Recipe(
+          //     id: "testing recipe ID",
+          //     images: ["https://firebasestorage.googleapis.com/v0/b/flutter-portfolio-app-izzy.firebasestorage.app/o/recipes%2FhTY4sxdEjHHqT1ovr1Cd%2Fimages%2FFIuScrERXbbGVdEhLhfBxsAI74y2_1738438945277.jpg?alt=media&token=215846ab-1003-4449-922b-c17fd3e54f48"],
+          //     title: "Title",
+          //     prepTime: '10 minutes',
+          //     cookTime: '15 minutes',
+          //     restTime: '20 minutes',
+          //     totalTime: '45 minutes',
+          //     rating: 4.5,
+          //     reviewsCount: 130,
+          //     servings: 10,
+          //     tags: ['tag1', 'tag2', 'tag3', 'tag1', 'tag2', 'tag3', 'tag1', 'tag2', 'tag3'],
+          //     description: 'This is a description of the recipe',
+          //     ingredients: [Ingredient(name: 'ingredient1', quantity: '1', unit: 'unit'), Ingredient(name: 'ingredient2', quantity: '2', unit: 'unit')],
+          //     ingredientsFormat: 'US',
+          //     equipment: ['equipment1', 'equipment2'],
+          //     instructions: [InstructionSection(sectionTitle: 'instruction_title_1', steps: ['instruction1', 'instruction2', 'instruction3'])],
+          //     notes: Notes(
+          //       personalNotes: ['personal_notes_1'],
+          //       proTips: ['pro_tip_1'],
+          //       storage: ['storage_1'],
+          //       makeAheadMethod: ['make_ahead_method_1'],
+          //       reheatingLeftovers: ['reheating_leftovers_1'],
+          //       other: ['other_1'],
+          //     ),
+          //     nutrition: Nutrition(
+          //       calories: 100,
+          //       fat: 10,
+          //       protein: 10,
+          //       carbs: 10,
+          //     ),
+          //     link: 'https://www.google.com',
+          //     author: 'Unknown Author',
+          //     source: 'Custom',
+          //     isPublic: false,
+          //   )
+          //),
         },
     );
   }
