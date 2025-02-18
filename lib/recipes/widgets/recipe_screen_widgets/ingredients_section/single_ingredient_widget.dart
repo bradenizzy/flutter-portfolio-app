@@ -3,8 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
 
-// TODO: IMPLEMENT THE SCALING FACTOR ON THE INGREDIENT QUANTITIES
-
 class SingleIngredientWidget extends StatelessWidget {
   final Ingredient ingredient;
   final bool isEditable;

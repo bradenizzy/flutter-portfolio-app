@@ -10,12 +10,14 @@ class IngredientsWidget extends StatefulWidget {
   final bool isEditable;
   final List<Ingredient> ingredients;
   final double servings;
+  final Function(List<Ingredient>)? onIngredientsChanged;
   
   const IngredientsWidget({
     Key? key, 
     this.isEditable = false, 
     required this.ingredients, 
-    required this.servings
+    required this.servings,
+    this.onIngredientsChanged,
   }) : super(key: key);
 
   @override
@@ -24,16 +26,50 @@ class IngredientsWidget extends StatefulWidget {
 
 class _IngredientsWidgetState extends State<IngredientsWidget> {
   double _scalingMultiplier = 1.0;
+  late List<Ingredient> _editableIngredients;
+
+  @override
+  void initState() {
+    super.initState();
+    _resetIngredients();
+  }
+
+  void _resetIngredients() {
+    setState(() {
+      _scalingMultiplier = 1.0;
+      _editableIngredients = List.from(widget.ingredients);
+    });
+  }
+
+  void _handleIngredientsChanged(List<Ingredient> updatedIngredients) {
+    setState(() {
+      _editableIngredients = updatedIngredients;
+    });
+    widget.onIngredientsChanged?.call(updatedIngredients);
+  }
+
+  @override
+  void didUpdateWidget(IngredientsWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.ingredients != oldWidget.ingredients) {
+      _resetIngredients();
+    }
+  }
 
   void _updateScalingMultiplier(double newMultiplier) {
-    setState(() {
-      _scalingMultiplier = newMultiplier;
-    });
+    if (!widget.isEditable) {
+      setState(() {
+        _scalingMultiplier = newMultiplier;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    print("Getting to IngredientsWidget");
+    if (widget.isEditable) {
+      _resetIngredients(); // Ensure reset when edit mode is activated
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -46,7 +82,7 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
         const SizedBox(height: 16),
         // Ingredients List
         IngredientsListWidget(
-          ingredients: widget.ingredients,
+          ingredients: _editableIngredients,
           isEditable: widget.isEditable,
           scalingMultiplier: _scalingMultiplier,
         ),
