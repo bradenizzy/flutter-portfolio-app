@@ -9,11 +9,17 @@ class IngredientsListWidget extends StatefulWidget {
   final bool isEditable;
   final double scalingMultiplier;
 
+  // TESTING
+  final Function(List<Ingredient>)? onIngredientsChanged;
+
   const IngredientsListWidget({
     Key? key,
     required this.ingredients,
     required this.isEditable,
     required this.scalingMultiplier,
+
+    // TESTING
+    this.onIngredientsChanged,
   }) : super(key: key);
 
   @override
@@ -21,25 +27,35 @@ class IngredientsListWidget extends StatefulWidget {
 }
 
 class _IngredientsListWidgetState extends State<IngredientsListWidget> {
-  late List<Ingredient> _ingredients;
 
   @override
   void initState() {
     super.initState();
-    _ingredients = List.from(widget.ingredients); // Create a modifiable list copy
   }
 
+  // TESTING
   void _addIngredient() {
-    setState(() {
-      _ingredients.add(Ingredient(quantity: '1', unit: 'unit', name: 'New Ingredient'));
-    });
+    final updatedIngredients = List<Ingredient>.from(widget.ingredients)
+      ..add(Ingredient(quantity: '1', unit: 'unit', name: 'New Ingredient'));
+    widget.onIngredientsChanged?.call(updatedIngredients);
   }
 
   void _removeIngredient(int index) {
-    setState(() {
-      _ingredients.removeAt(index);
-    });
+    final updatedIngredients = List<Ingredient>.from(widget.ingredients)
+      ..removeAt(index);
+    widget.onIngredientsChanged?.call(updatedIngredients);
   }
+  // void _addIngredient() {
+  //   setState(() {
+  //     widget.ingredients.add(Ingredient(quantity: '1', unit: 'unit', name: 'New Ingredient'));
+  //   });
+  // }
+
+  // void _removeIngredient(int index) {
+  //   setState(() {
+  //     widget.ingredients.removeAt(index);
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +64,10 @@ class _IngredientsListWidgetState extends State<IngredientsListWidget> {
         ListView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: _ingredients.length,
+          itemCount: widget.ingredients.length,
           itemBuilder: (context, index) {
             return Dismissible(
-              key: ValueKey("${_ingredients[index].name}_$index"),
-              //key: ValueKey(_ingredients[index]),
+              key: ValueKey("${widget.ingredients[index].name}_$index"),
               direction: widget.isEditable ? DismissDirection.endToStart : DismissDirection.none,
               onDismissed: (direction) => _removeIngredient(index),
               background: Container(
@@ -62,7 +77,7 @@ class _IngredientsListWidgetState extends State<IngredientsListWidget> {
                 child: const Icon(Icons.delete, color: Colors.white),
               ),
               child: SingleIngredientWidget(
-                ingredient: _ingredients[index],
+                ingredient: widget.ingredients[index],
                 isEditable: widget.isEditable,
                 scalingMultiplier: widget.scalingMultiplier,
               ),

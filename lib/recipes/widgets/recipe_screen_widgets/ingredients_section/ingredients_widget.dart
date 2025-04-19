@@ -10,12 +10,18 @@ class IngredientsWidget extends StatefulWidget {
   final bool isEditable;
   final List<Ingredient> ingredients;
   final double servings;
+
+  // TESTING
+  final Function(List<Ingredient>)? onIngredientsChanged;
   
   const IngredientsWidget({
     Key? key, 
     this.isEditable = false, 
     required this.ingredients, 
-    required this.servings
+    required this.servings,
+    
+    // TESTING
+    this.onIngredientsChanged,
   }) : super(key: key);
 
   @override
@@ -35,6 +41,9 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
   void _resetIngredients() {
     _scalingMultiplier = 1.0; // Reset scaling when entering edit mode
     _editableIngredients = List.from(widget.ingredients); // Make a modifiable copy
+    print("IngredientsWidget: _resetIngredients method............");
+    print("IngredientsWidget: widget.ingredients: ${widget.ingredients}");
+    print("IngredientsWidget: _editableIngredients: $_editableIngredients");
   }
 
   void _updateScalingMultiplier(double newMultiplier) {
@@ -48,6 +57,9 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.isEditable) {
+      print("IngredientsWidget: in the widget build............");
+      print("IngredientsWidget: widget.ingredients: ${widget.ingredients}");
+      print("IngredientsWidget: _editableIngredients: $_editableIngredients");
       _resetIngredients(); // Ensure reset when edit mode is activated
     }
 

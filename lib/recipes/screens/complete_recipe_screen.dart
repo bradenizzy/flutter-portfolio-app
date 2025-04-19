@@ -30,14 +30,14 @@ class CompleteRecipeScreen extends StatefulWidget {
 class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
   bool isEditMode = false;
   late Recipe recipe;
-  late Recipe originalRecipe; // ✅ Keep a copy of the original recipe
+  late Recipe originalRecipe;
   final RecipeService recipeService = RecipeService();
 
   @override
   void initState() {
     super.initState();
     recipe = widget.recipe;
-    originalRecipe = widget.recipe; // ✅ Store the original recipe for discarding edits
+    originalRecipe = recipe.copyWith(); // deep copy of the recipe
   }
 
   /// ✅ Shows a confirmation dialog for discarding changes
@@ -114,7 +114,6 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
     } else {
       setState(() {
         isEditMode = true;
-        originalRecipe = recipe; // ✅ Store a fresh copy of the recipe
       });
     }
   }
@@ -164,10 +163,15 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
                 onDescriptionChanged: (newDescription) => setState(() => recipe = recipe.copyWith(description: newDescription)),
               ),
               SizedBox(height: 16),
+              // // NOT SURE HOW TO IMPLEMENT?
               IngredientsWidget(
                 isEditable: isEditMode,
                 ingredients: recipe.ingredients,
                 servings: recipe.servings.toDouble(),
+                // TESTING
+                onIngredientsChanged: (updatedIngredients) => setState(() {
+                  recipe = recipe.copyWith(ingredients: updatedIngredients);
+                }),
               ),
               SizedBox(height: 16),
               EquipmentWidget(equipment: recipe.equipment),
