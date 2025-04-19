@@ -1,7 +1,9 @@
 // recipe.dart
+import 'package:uuid/uuid.dart';
 
 // TODO: ADD PUBLIC ATTRIBUTES TO RECIPE MODEL (e.g. publicImages, ... )
 class Recipe {
+  static final Uuid uuid = Uuid();
   final String id; // Unique ID for the recipe
   final List<String> images; // URLs for recipe images
   final String title; // Recipe title (required)
@@ -111,7 +113,7 @@ class Recipe {
       isPublic: json['isPublic'] ?? false,
     );
   }
-  
+
   Recipe copyWith({
     String? id,
     List<String>? images,
@@ -139,7 +141,7 @@ class Recipe {
   }) {
     return Recipe(
       id: id ?? this.id,
-      images: images ?? this.images,
+      images: images != null ? List.from(images) : List.from(this.images),
       title: title ?? this.title,
       prepTime: prepTime ?? this.prepTime,
       cookTime: cookTime ?? this.cookTime,
@@ -149,14 +151,18 @@ class Recipe {
       reviewsCount: reviewsCount ?? this.reviewsCount,
       servings: servings ?? this.servings,
       servingsUnit: servingsUnit ?? this.servingsUnit,
-      tags: tags ?? this.tags,
+      tags: tags != null ? List.from(tags) : List.from(this.tags),
       description: description ?? this.description,
-      ingredients: ingredients ?? this.ingredients,
+      ingredients: ingredients != null
+          ? ingredients.map((i) => i.copyWith()).toList()
+          : this.ingredients.map((i) => i.copyWith()).toList(),
       ingredientsFormat: ingredientsFormat ?? this.ingredientsFormat,
-      equipment: equipment ?? this.equipment,
-      instructions: instructions ?? this.instructions,
-      notes: notes ?? this.notes,
-      nutrition: nutrition ?? this.nutrition,
+      equipment: equipment != null ? List.from(equipment) : List.from(this.equipment),
+      instructions: instructions != null
+          ? instructions.map((s) => s.copyWith()).toList()
+          : this.instructions.map((s) => s.copyWith()).toList(),
+      notes: notes ?? this.notes.copyWith(),
+      nutrition: nutrition ?? this.nutrition.copyWith(),
       link: link ?? this.link,
       author: author ?? this.author,
       source: source ?? this.source,
@@ -166,19 +172,23 @@ class Recipe {
 }
 
 
+// TODO: CREATE A MASTER INGREDIENT ID SYSTEM TO ASSIGN UNIQUE IDS TO INGREDIENTS
 class Ingredient {
-  final String quantity; // e.g., "½"
-  final String unit; // e.g., "tbsp"
-  final String name; // e.g., "olive oil"
+  final String id;
+  final String quantity;
+  final String unit;
+  final String name;
 
   Ingredient({
+    String? id,
     required this.quantity,
     required this.unit,
     required this.name,
-  });
+  }) : id = id ?? const Uuid().v4();
 
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
+      id: json['id'] as String,
       quantity: json['quantity'] as String,
       name: json['name'] as String,
       unit: json['unit'] as String,
@@ -187,6 +197,7 @@ class Ingredient {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'quantity': quantity,
       'unit': unit,
       'name': name,
@@ -196,6 +207,20 @@ class Ingredient {
   @override
   String toString() {
     return '$quantity $unit $name';
+  }
+
+  Ingredient copyWith({
+    String? id,
+    String? quantity,
+    String? unit,
+    String? name,
+  }) {
+    return Ingredient(
+      id: id ?? this.id,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      name: name ?? this.name,
+    );
   }
 }
 
@@ -220,6 +245,16 @@ class InstructionSection {
     return InstructionSection(
       sectionTitle: json['sectionTitle'],
       steps: List<String>.from(json['steps']),
+    );
+  }
+
+  InstructionSection copyWith({
+    String? sectionTitle,
+    List<String>? steps,
+  }) {
+    return InstructionSection(
+      sectionTitle: sectionTitle ?? this.sectionTitle,
+      steps: steps != null ? List.from(steps) : List.from(this.steps),
     );
   }
 }
@@ -263,6 +298,24 @@ class Notes {
       other: List<String>.from(json['other'] ?? []),
     );
   }
+
+  Notes copyWith({
+    List<String>? personalNotes,
+    List<String>? proTips,
+    List<String>? storage,
+    List<String>? makeAheadMethod,
+    List<String>? reheatingLeftovers, 
+    List<String>? other,
+  }) {
+    return Notes(
+      personalNotes: personalNotes != null ? List.from(personalNotes) : List.from(this.personalNotes),
+      proTips: proTips != null ? List.from(proTips) : List.from(this.proTips),
+      storage: storage != null ? List.from(storage) : List.from(this.storage),
+      makeAheadMethod: makeAheadMethod != null ? List.from(makeAheadMethod) : List.from(this.makeAheadMethod),
+      reheatingLeftovers: reheatingLeftovers != null ? List.from(reheatingLeftovers) : List.from(this.reheatingLeftovers),
+      other: other != null ? List.from(other) : List.from(this.other),
+    );
+  }
 }
 
 class Nutrition {
@@ -301,6 +354,24 @@ class Nutrition {
       carbs: json['carbs'] != null ? (json['carbs'] as num).toDouble() : null,
       sugar: json['sugar'] != null ? (json['sugar'] as num).toDouble() : null,
       fiber: json['fiber'] != null ? (json['fiber'] as num).toDouble() : null,
+    );
+  }
+
+  Nutrition copyWith({
+    double? calories,
+    double? fat,
+    double? protein,
+    double? carbs,
+    double? sugar,
+    double? fiber,
+  }) {
+    return Nutrition(
+      calories: calories ?? this.calories,
+      fat: fat ?? this.fat,
+      protein: protein ?? this.protein,
+      carbs: carbs ?? this.carbs,
+      sugar: sugar ?? this.sugar,
+      fiber: fiber ?? this.fiber,
     );
   }
 }

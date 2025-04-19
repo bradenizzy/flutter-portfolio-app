@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/ingredients_section/scaling_ingredients_widget.dart';
 
-
 class TopRowWidget extends StatelessWidget {
   final double servings;
   final double scalingMultiplier;

@@ -40,7 +40,18 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
     originalRecipe = recipe.copyWith(); // deep copy of the recipe
   }
 
-  /// ✅ Shows a confirmation dialog for discarding changes
+  /// Toggles edit mode and handles discarding edits
+  void _toggleEditMode() {
+    if (isEditMode) {
+      _confirmDiscardChanges(); // Ask for confirmation before discarding edits
+    } else {
+      setState(() {
+        isEditMode = true;
+      });
+    }
+  }
+
+  // Shows a confirmation dialog for discarding changes
   Future<void> _confirmDiscardChanges() async {
     bool discard = await showDialog(
       context: context,
@@ -63,12 +74,12 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
     if (discard) {
       setState(() {
         isEditMode = false;
-        recipe = originalRecipe; // ✅ Restore the original recipe
+        recipe = originalRecipe; // Restore the original recipe
       });
     }
   }
 
-  /// ✅ Shows a confirmation dialog before saving
+  /// Shows a confirmation dialog before saving
   Future<void> _confirmSaveRecipe() async {
     bool save = await showDialog(
       context: context,
@@ -93,7 +104,7 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
     }
   }
 
-  /// ✅ Saves the recipe and refreshes the screen
+  /// Saves the recipe and refreshes the screen
   Future<void> _saveRecipe() async {
     Navigator.push(context, MaterialPageRoute(builder: (_) => LoadingScreen()));
 
@@ -107,16 +118,6 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
     );
   }
 
-  /// ✅ Toggles edit mode and handles discarding edits
-  void _toggleEditMode() {
-    if (isEditMode) {
-      _confirmDiscardChanges(); // ✅ Ask for confirmation before discarding edits
-    } else {
-      setState(() {
-        isEditMode = true;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +132,7 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
           if (isEditMode)
             IconButton(
               icon: Icon(Icons.save),
-              onPressed: _confirmSaveRecipe, // ✅ Use confirmation before saving
+              onPressed: _confirmSaveRecipe, // Use confirmation before saving
             ),
         ],
       ),

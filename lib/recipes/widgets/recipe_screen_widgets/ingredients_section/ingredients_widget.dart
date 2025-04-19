@@ -10,8 +10,6 @@ class IngredientsWidget extends StatefulWidget {
   final bool isEditable;
   final List<Ingredient> ingredients;
   final double servings;
-
-  // TESTING
   final Function(List<Ingredient>)? onIngredientsChanged;
   
   const IngredientsWidget({
@@ -19,8 +17,6 @@ class IngredientsWidget extends StatefulWidget {
     this.isEditable = false, 
     required this.ingredients, 
     required this.servings,
-    
-    // TESTING
     this.onIngredientsChanged,
   }) : super(key: key);
 
@@ -55,14 +51,21 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (widget.isEditable) {
-      print("IngredientsWidget: in the widget build............");
-      print("IngredientsWidget: widget.ingredients: ${widget.ingredients}");
-      print("IngredientsWidget: _editableIngredients: $_editableIngredients");
-      _resetIngredients(); // Ensure reset when edit mode is activated
+  void didUpdateWidget(covariant IngredientsWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset when entering edit mode
+    if (!oldWidget.isEditable && widget.isEditable) {
+      _resetIngredients();
     }
+    // Reset when leaving edit mode and new ingredients come in
+    if (!widget.isEditable &&
+        widget.ingredients != oldWidget.ingredients) {
+      _resetIngredients();
+    }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -78,6 +81,14 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
           ingredients: _editableIngredients,
           isEditable: widget.isEditable,
           scalingMultiplier: _scalingMultiplier,
+          onIngredientsChanged: (updatedIngredients) {
+            setState(() {
+              _editableIngredients = updatedIngredients;
+            });
+
+            // Pass the updated list back to the parent screen
+            widget.onIngredientsChanged?.call(updatedIngredients);
+          },
         ),
       ],
     );
