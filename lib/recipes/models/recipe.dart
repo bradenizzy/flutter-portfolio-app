@@ -393,21 +393,27 @@ class Nutrition {
     );
   }
 
-  Nutrition copyWith({
+ Nutrition copyWith({
     double? calories,
+    bool removeCalories = false,
     double? fat,
+    bool removeFat = false,
     double? protein,
+    bool removeProtein = false,
     double? carbs,
+    bool removeCarbs = false,
     double? sugar,
+    bool removeSugar = false,
     double? fiber,
+    bool removeFiber = false,
   }) {
     return Nutrition(
-      calories: calories ?? this.calories,
-      fat: fat ?? this.fat,
-      protein: protein ?? this.protein,
-      carbs: carbs ?? this.carbs,
-      sugar: sugar ?? this.sugar,
-      fiber: fiber ?? this.fiber,
+      calories: removeCalories ? null : (calories ?? this.calories),
+      fat: removeFat ? null : (fat ?? this.fat),
+      protein: removeProtein ? null : (protein ?? this.protein),
+      carbs: removeCarbs ? null : (carbs ?? this.carbs),
+      sugar: removeSugar ? null : (sugar ?? this.sugar),
+      fiber: removeFiber ? null : (fiber ?? this.fiber),
     );
   }
 }

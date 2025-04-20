@@ -1,15 +1,16 @@
-// nutrition_widget.dart
-
 import 'package:flutter/material.dart';
 import '../../models/recipe.dart';
 
-
 class NutritionWidget extends StatefulWidget {
   final Nutrition nutrition;
+  final bool isEditable;
+  final Function(Nutrition updated)? onNutritionChanged;
 
   const NutritionWidget({
     Key? key,
     required this.nutrition,
+    this.isEditable = false,
+    this.onNutritionChanged,
   }) : super(key: key);
 
   @override
@@ -17,135 +18,176 @@ class NutritionWidget extends StatefulWidget {
 }
 
 class _NutritionWidgetState extends State<NutritionWidget> {
+  late Nutrition _editableNutrition;
   bool _isExpanded = false;
 
-  String _formatValue(dynamic value, {String? unit}) {
-    if (value == null) return 'Unknown';
-    return unit != null ? '$value$unit' : value.toString();
+  @override
+  void initState() {
+    super.initState();
+    _editableNutrition = widget.nutrition.copyWith();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
+  void didUpdateWidget(NutritionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.nutrition != oldWidget.nutrition) {
+      setState(() {
+        _editableNutrition = widget.nutrition.copyWith();
+      });
+    }
+  }
+
+  String _displayValue(double? value, {String? unit}) {
+    if (value == null) return '?';
+    return unit != null ? '$value$unit' : value.toString();
+  }
+
+  void _updateValue(String field, String newValue) {
+    final bool shouldRemove = newValue.trim().isEmpty;
+    final double? parsed = shouldRemove ? null : double.tryParse(newValue);
+
+    setState(() {
+      _editableNutrition = switch (field) {
+        'calories' => _editableNutrition.copyWith(
+          calories: parsed, removeCalories: shouldRemove),
+        'fat' => _editableNutrition.copyWith(
+          fat: parsed, removeFat: shouldRemove),
+        'carbs' => _editableNutrition.copyWith(
+          carbs: parsed, removeCarbs: shouldRemove),
+        'protein' => _editableNutrition.copyWith(
+          protein: parsed, removeProtein: shouldRemove),
+        'sugar' => _editableNutrition.copyWith(
+          sugar: parsed, removeSugar: shouldRemove),
+        'fiber' => _editableNutrition.copyWith(
+          fiber: parsed, removeFiber: shouldRemove),
+        _ => _editableNutrition,
+      };
+    });
+    widget.onNutritionChanged?.call(_editableNutrition);
+  }
+
+  Widget _buildEditableRow(String label, double? value, String field, {String unit = 'g'}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Nutrition Info',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _isExpanded = !_isExpanded;
-                  });
-                },
-                child: Row(
-                  children: [
-                    Text(
-                      _isExpanded ? 'Hide Info' : 'Show Info',
-                      style: TextStyle(
-                        color: Colors.pink[300],
-                        fontSize: 18,
-                      ),
-                    ),
-                    Icon(
-                      _isExpanded ? Icons.remove : Icons.add,
-                      color: Colors.pink[300],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (_isExpanded) ...[
-            const SizedBox(height: 20),
-            _buildNutritionRow('calories', _formatValue(widget.nutrition.calories)),
-            _buildDivider(),
-            _buildNutritionRow('fat', _formatValue(widget.nutrition.fat, unit: 'g')),
-            _buildDivider(),
-            _buildNutritionRow('carbs', _formatValue(widget.nutrition.carbs, unit: 'g')),
-            _buildDivider(),
-            _buildNutritionRow('protein', _formatValue(widget.nutrition.protein, unit: 'g')),
-            _buildDivider(),
-            _buildNutritionRow('sugar', _formatValue(widget.nutrition.sugar, unit: 'g')),
-            _buildDivider(),
-            _buildNutritionRow('fiber', _formatValue(widget.nutrition.fiber, unit: 'g')),
-            const SizedBox(height: 20),
-            const Text(
-              'Estimated values based on one serving size.',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
+          Text(label, style: const TextStyle(fontSize: 16)),
+          SizedBox(
+            width: 100,
+            child: TextFormField(
+              initialValue: value?.toString() ?? '',
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              onChanged: (val) => _updateValue(field, val),
+              decoration: InputDecoration(
+                suffixText: field == 'calories' ? 'cal' : unit,
+                border: const OutlineInputBorder(),
+                isDense: true,
               ),
             ),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildNutritionRow(String label, String value) {
+  Widget _buildDisplayRow(String label, double? value, {String unit = ' g'}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Text(label, style: const TextStyle(fontSize: 16)),
           Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            _displayValue(value, unit: label == 'Calories' ? ' cal' : unit),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDivider() {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
-      height: 1,
-      color: Colors.grey[800],
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        children: [
+          // Header Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Nutrition Info',
+                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              TextButton.icon(
+                onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                icon: Icon(_isExpanded ? Icons.remove : Icons.add, color: theme.colorScheme.primary),
+                label: Text(
+                  _isExpanded ? 'Hide Info' : 'Show Info',
+                  style: TextStyle(color: theme.colorScheme.primary),
+                ),
+              ),
+            ],
+          ),
+          if (_isExpanded)
+            Column(
+              children: [
+                const SizedBox(height: 16),
+                widget.isEditable
+                    ? _buildEditableRow('Calories', _editableNutrition.calories, 'calories')
+                    : _buildDisplayRow('Calories', _editableNutrition.calories),
+                const Divider(),
+                widget.isEditable
+                    ? _buildEditableRow('Fat', _editableNutrition.fat, 'fat')
+                    : _buildDisplayRow('Fat', _editableNutrition.fat),
+                const Divider(),
+                widget.isEditable
+                    ? _buildEditableRow('Carbs', _editableNutrition.carbs, 'carbs')
+                    : _buildDisplayRow('Carbs', _editableNutrition.carbs),
+                const Divider(),
+                widget.isEditable
+                    ? _buildEditableRow('Protein', _editableNutrition.protein, 'protein')
+                    : _buildDisplayRow('Protein', _editableNutrition.protein),
+                const Divider(),
+                widget.isEditable
+                    ? _buildEditableRow('Sugar', _editableNutrition.sugar, 'sugar')
+                    : _buildDisplayRow('Sugar', _editableNutrition.sugar),
+                const Divider(),
+                widget.isEditable
+                    ? _buildEditableRow('Fiber', _editableNutrition.fiber, 'fiber')
+                    : _buildDisplayRow('Fiber', _editableNutrition.fiber),
+                const SizedBox(height: 20),
+                const Text(
+                  'Estimated values based on one serving size.',
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }
+
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
+
 // class NutritionWidget extends StatefulWidget {
 //   final Nutrition nutrition;
-
-//   /// Whether the fields are editable or read-only.
-//   final bool isEditable;
-
-//   /// Callback to notify parent of any changes in the Nutrition fields.
-//   /// In practice, you might just pass in an entire updated Nutrition object
-//   /// or pass each field value one by one. Below we do an example that
-//   /// passes field, newValue, so the parent can update the model accordingly.
-//   final void Function(String fieldName, String newValue)? onNutritionChanged;
 
 //   const NutritionWidget({
 //     Key? key,
 //     required this.nutrition,
-//     this.isEditable = false,
-//     this.onNutritionChanged,
 //   }) : super(key: key);
 
 //   @override
@@ -155,207 +197,60 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 // class _NutritionWidgetState extends State<NutritionWidget> {
 //   bool _isExpanded = false;
 
-//   late TextEditingController _caloriesController;
-//   late TextEditingController _fatController;
-//   late TextEditingController _carbsController;
-//   late TextEditingController _proteinController;
-//   late TextEditingController _sugarController;
-//   late TextEditingController _fiberController;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _initializeControllers();
-//   }
-
-//   /// Initialize each field from the widget.nutrition values.
-//   void _initializeControllers() {
-//     _caloriesController = TextEditingController(
-//       text: widget.nutrition.calories.toString(),
-//     );
-//     _fatController = TextEditingController(
-//       text: widget.nutrition.fat.toString(),
-//     );
-//     _carbsController = TextEditingController(
-//       text: widget.nutrition.carbs.toString(),
-//     );
-//     _proteinController = TextEditingController(
-//       text: widget.nutrition.protein.toString(),
-//     );
-//     _sugarController = TextEditingController(
-//       text: widget.nutrition.sugar.toString(),
-//     );
-//     _fiberController = TextEditingController(
-//       text: widget.nutrition.fiber.toString(),
-//     );
-//   }
-
-//   /// If the parent replaces the entire nutrition object with a new one,
-//   /// we may want to re-initialize the controllers. One naive approach:
-//   @override
-//   void didUpdateWidget(NutritionWidget oldWidget) {
-//     super.didUpdateWidget(oldWidget);
-//     if (widget.nutrition != oldWidget.nutrition) {
-//       _initializeControllers();
-//     }
-//   }
-
-//   @override
-//   void dispose() {
-//     _caloriesController.dispose();
-//     _fatController.dispose();
-//     _carbsController.dispose();
-//     _proteinController.dispose();
-//     _sugarController.dispose();
-//     _fiberController.dispose();
-//     super.dispose();
-//   }
-
-//   /// Helper: If in read-only mode, just display text.
-//   /// If in edit mode, display a TextField with an onChanged that
-//   /// notifies the parent.
-//   Widget _buildValueWidget({
-//     required String fieldName,
-//     required TextEditingController controller,
-//     String? unit,
-//   }) {
-//     if (!widget.isEditable) {
-//       // Read-only mode
-//       String displayValue = controller.text;
-//       if (displayValue.isEmpty) {
-//         displayValue = 'Unknown';
-//       }
-//       return Text(
-//         unit != null ? '$displayValue$unit' : displayValue,
-//         style: const TextStyle(
-//           color: Colors.white,
-//           fontSize: 20,
-//           fontWeight: FontWeight.bold,
-//         ),
-//       );
-//     } else {
-//       // Edit mode
-//       return SizedBox(
-//         width: 80, // Adjust as needed
-//         child: TextField(
-//           controller: controller,
-//           style: const TextStyle(color: Colors.white, fontSize: 18),
-//           keyboardType: TextInputType.number, // if you want numeric only
-//           decoration: InputDecoration(
-//             // Show "g" or "cal" etc. within the field? Up to you.
-//             hintText: unit != null ? 'Enter $fieldName ($unit)' : 'Enter $fieldName',
-//             hintStyle: TextStyle(color: Colors.grey[400]),
-//             enabledBorder: const UnderlineInputBorder(
-//               borderSide: BorderSide(color: Colors.white54),
-//             ),
-//             focusedBorder: const UnderlineInputBorder(
-//               borderSide: BorderSide(color: Colors.pink),
-//             ),
-//           ),
-//           onChanged: (value) {
-//             // Notify parent about changes, so it can update the model
-//             widget.onNutritionChanged?.call(fieldName, value);
-//           },
-//         ),
-//       );
-//     }
-//   }
-
-//   Widget _buildNutritionRow(
-//     String label,
-//     TextEditingController controller, {
-//     String? unit,
-//   }) {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(vertical: 12),
-//       child: Row(
-//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//         children: [
-//           // Label on the left
-//           Text(
-//             label,
-//             style: const TextStyle(
-//               color: Colors.white,
-//               fontSize: 20,
-//             ),
-//           ),
-//           // Value or editable field on the right
-//           _buildValueWidget(
-//             fieldName: label,
-//             controller: controller,
-//             unit: unit,
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildDivider() {
-//     return Container(
-//       height: 1,
-//       color: Colors.grey[800],
-//     );
+//   String _formatValue(dynamic value, {String? unit}) {
+//     if (value == null) return 'Unknown';
+//     return unit != null ? '$value$unit' : value.toString();
 //   }
 
 //   @override
 //   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+
 //     return Container(
 //       padding: const EdgeInsets.all(16),
 //       decoration: BoxDecoration(
-//         color: Colors.grey[900],
+//         color: theme.colorScheme.surface,
 //         borderRadius: BorderRadius.circular(12),
+//         border: Border.all(color: Colors.grey.shade300),
 //       ),
 //       child: Column(
 //         children: [
-//           // Row with "Nutrition Info" and Show/Hide button
+//           // Header Row
 //           Row(
 //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //             children: [
-//               const Text(
+//               Text(
 //                 'Nutrition Info',
-//                 style: TextStyle(
-//                   color: Colors.white,
-//                   fontSize: 24,
+//                 style: theme.textTheme.titleLarge?.copyWith(
 //                   fontWeight: FontWeight.bold,
 //                 ),
 //               ),
-//               TextButton(
-//                 onPressed: () {
-//                   setState(() {
-//                     _isExpanded = !_isExpanded;
-//                   });
-//                 },
-//                 child: Row(
-//                   children: [
-//                     Text(
-//                       _isExpanded ? 'Hide Info' : 'Show Info',
-//                       style: TextStyle(
-//                         color: Colors.pink[300],
-//                         fontSize: 18,
-//                       ),
-//                     ),
-//                     Icon(
-//                       _isExpanded ? Icons.remove : Icons.add,
-//                       color: Colors.pink[300],
-//                     ),
-//                   ],
+//               TextButton.icon(
+//                 onPressed: () => setState(() => _isExpanded = !_isExpanded),
+//                 icon: Icon(
+//                   _isExpanded ? Icons.remove : Icons.add,
+//                   color: theme.colorScheme.primary,
+//                 ),
+//                 label: Text(
+//                   _isExpanded ? 'Hide Info' : 'Show Info',
+//                   style: TextStyle(color: theme.colorScheme.primary),
 //                 ),
 //               ),
 //             ],
 //           ),
 //           if (_isExpanded) ...[
 //             const SizedBox(height: 20),
-//             _buildNutritionRow('calories', _caloriesController),
+//             _buildNutritionRow('Calories', _formatValue(widget.nutrition.calories)),
 //             _buildDivider(),
-//             _buildNutritionRow('fat', _fatController, unit: 'g'),
+//             _buildNutritionRow('Fat', _formatValue(widget.nutrition.fat, unit: 'g')),
 //             _buildDivider(),
-//             _buildNutritionRow('carbs', _carbsController, unit: 'g'),
+//             _buildNutritionRow('Carbs', _formatValue(widget.nutrition.carbs, unit: 'g')),
 //             _buildDivider(),
-//             _buildNutritionRow('protein', _proteinController, unit: 'g'),
+//             _buildNutritionRow('Protein', _formatValue(widget.nutrition.protein, unit: 'g')),
 //             _buildDivider(),
-//             _buildNutritionRow('sugar', _sugarController, unit: 'g'),
+//             _buildNutritionRow('Sugar', _formatValue(widget.nutrition.sugar, unit: 'g')),
 //             _buildDivider(),
-//             _buildNutritionRow('fiber', _fiberController, unit: 'g'),
+//             _buildNutritionRow('Fiber', _formatValue(widget.nutrition.fiber, unit: 'g')),
 //             const SizedBox(height: 20),
 //             const Text(
 //               'Estimated values based on one serving size.',
@@ -368,5 +263,28 @@ class _NutritionWidgetState extends State<NutritionWidget> {
 //         ],
 //       ),
 //     );
+//   }
+
+//   Widget _buildNutritionRow(String label, String value) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 12),
+//       child: Row(
+//         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//         children: [
+//           Text(label, style: const TextStyle(fontSize: 16)),
+//           Text(
+//             value,
+//             style: const TextStyle(
+//               fontSize: 16,
+//               fontWeight: FontWeight.bold,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildDivider() {
+//     return Divider(color: Colors.grey.shade300, thickness: 1);
 //   }
 // }

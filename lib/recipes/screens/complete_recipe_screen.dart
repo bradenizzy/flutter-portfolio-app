@@ -266,9 +266,25 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
 
               NutritionWidget(
                 nutrition: recipe.nutrition,
+                isEditable: isEditMode,
+                onNutritionChanged: (updated) {
+                  setState(() {
+                    recipe = recipe.copyWith(nutrition: updated);
+                  });
+                },
               ),
+
               SizedBox(height: 16),
-              TagsWidget(tags: recipe.tags),
+              TagsWidget(
+                tags: recipe.tags,
+                isEditable: isEditMode,
+                onTagsChanged: (updatedTags) {
+                  setState(() {
+                    recipe = recipe.copyWith(tags: updatedTags);
+                  });
+                },
+              ),
+
               SizedBox(height: 16),
               PlaceholderWidget(title: 'Related Recipes Placeholder'),
               SizedBox(height: 16),
