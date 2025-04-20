@@ -1,21 +1,18 @@
 // notes_widget.dart
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../../models/recipe.dart';
 
 class NotesWidget extends StatefulWidget {
   final Notes notes;
   final bool isEditable;
-  final Function(String, int, String)? onNoteChanged;
-  final Function(String, int)? onNoteDeleted;
-  final Function(String)? onNoteAdded;
+  final Function(Notes updatedNotes)? onNotesChanged;
 
   const NotesWidget({
     Key? key,
     required this.notes,
     this.isEditable = false,
-    this.onNoteChanged,
-    this.onNoteDeleted,
-    this.onNoteAdded,
+    this.onNotesChanged,
   }) : super(key: key);
 
   @override
@@ -23,9 +20,11 @@ class NotesWidget extends StatefulWidget {
 }
 
 class _NotesWidgetState extends State<NotesWidget> {
-  late Map<String, List<TextEditingController>> _noteControllers;
+  final Uuid _uuid = const Uuid();
 
-  final Map<String, String> _sectionTitles = {
+  late Map<String, List<_NoteEntry>> _editableNotes;
+
+  final Map<String, String> _sectionTitles = const {
     'personalNotes': 'My Notes',
     'proTips': 'Pro Tips',
     'storage': 'Storage Instructions',
@@ -37,92 +36,138 @@ class _NotesWidgetState extends State<NotesWidget> {
   @override
   void initState() {
     super.initState();
-    _initializeControllers();
+    _resetLocalNotes();
   }
 
-  /// Initialize each notes section with a list of TextControllers,
-  /// one controller per note in the list.
-  void _initializeControllers() {
-    _noteControllers = {};
-    for (var section in _sectionTitles.keys) {
-      List<String> notes = _getNotes(section);
-      _noteControllers[section] = notes
-          .map((note) => TextEditingController(text: note))
-          .toList();
-    }
-  }
-
-  /// Return the list of notes for a given section
-  List<String> _getNotes(String section) {
-    return switch (section) {
-      'personalNotes' => widget.notes.personalNotes,
-      'proTips' => widget.notes.proTips,
-      'storage' => widget.notes.storage,
-      'makeAheadMethod' => widget.notes.makeAheadMethod,
-      'reheatingLeftovers' => widget.notes.reheatingLeftovers,
-      'other' => widget.notes.other,
-      _ => [],
-    };
-  }
-
-  /// IMPORTANT: Do NOT rebuild controllers on every new widget update,
-  /// or typing will cause "reversed text" symptoms.
-  /// Only do it if you truly detect a brand-new notes object (for instance, a new recipe).
   @override
-  void didUpdateWidget(NotesWidget oldWidget) {
+  void didUpdateWidget(covariant NotesWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the entire notes object changed in a big way (e.g. new recipe ID),
-    // you might re-init. Otherwise, do nothing to avoid reversing typed text.
-    // Example condition: if (widget.notes != oldWidget.notes) { ... }
+    if (widget.notes != oldWidget.notes) {
+      _disposeControllers();
+      _resetLocalNotes();
+
+      // ✅ After recreating, update controller values just in case
+      for (final list in _editableNotes.values) {
+        for (final note in list) {
+          note.updateControllerText();
+        }
+      }
+    }
   }
 
   @override
   void dispose() {
-    for (var controllers in _noteControllers.values) {
-      for (var controller in controllers) {
-        controller.dispose();
-      }
-    }
+    _disposeControllers();
     super.dispose();
   }
 
+  void _disposeControllers() {
+    _editableNotes.forEach((_, entries) {
+      for (final entry in entries) {
+        entry.dispose();
+      }
+    });
+  }
+
+  void _resetLocalNotes() {
+    _editableNotes = {
+      for (final section in _sectionTitles.keys)
+        section: List<_NoteEntry>.from(
+          _getSectionList(widget.notes, section).map(
+            (note) => _NoteEntry(id: _uuid.v4(), value: note),
+          ),
+        ),
+    };
+  }
+
+  List<String> _getSectionList(Notes notes, String section) {
+    switch (section) {
+      case 'personalNotes':
+        return notes.personalNotes;
+      case 'proTips':
+        return notes.proTips;
+      case 'storage':
+        return notes.storage;
+      case 'makeAheadMethod':
+        return notes.makeAheadMethod;
+      case 'reheatingLeftovers':
+        return notes.reheatingLeftovers;
+      case 'other':
+        return notes.other;
+      default:
+        return [];
+    }
+  }
+
+  void _deleteNote(String section, int index) {
+    setState(() {
+      _editableNotes[section]![index].dispose();
+      _editableNotes[section]!.removeAt(index);
+    });
+    _emitChange();
+  }
+
+  void _addNote(String section) {
+    setState(() {
+      _editableNotes[section]!.add(_NoteEntry(id: _uuid.v4(), value: ''));
+    });
+    _emitChange();
+  }
+
+  void _onTextFieldFocusLost() {
+    _emitChange();
+  }
+
+  void _emitChange() {
+    if (widget.onNotesChanged != null) {
+      widget.onNotesChanged!(
+        Notes(
+          personalNotes: _editableNotes['personalNotes']!.map((e) => e.value).toList(),
+          proTips: _editableNotes['proTips']!.map((e) => e.value).toList(),
+          storage: _editableNotes['storage']!.map((e) => e.value).toList(),
+          makeAheadMethod: _editableNotes['makeAheadMethod']!.map((e) => e.value).toList(),
+          reheatingLeftovers: _editableNotes['reheatingLeftovers']!.map((e) => e.value).toList(),
+          other: _editableNotes['other']!.map((e) => e.value).toList(),
+        ),
+      );
+    }
+  }
+
   Widget _buildNotesList(String section, String title) {
-    var controllers = _noteControllers[section] ?? [];
+    final notes = _editableNotes[section]!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (controllers.isEmpty && !widget.isEditable)
-          Text(
-            'No ${title.toLowerCase()} added yet',
-            style: const TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: controllers.length,
-          padding: EdgeInsets.zero,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '• ',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  Expanded(
-                    child: widget.isEditable
-                        ? Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: controllers[index],
-                                  onChanged: (value) {
-                                    // Let the parent know about the change
-                                    widget.onNoteChanged
-                                        ?.call(section, index, value);
+        if (notes.isEmpty && !widget.isEditable)
+          Text('No ${title.toLowerCase()} yet.',
+              style: const TextStyle(fontStyle: FontStyle.italic)),
+        ...notes.asMap().entries.map((entry) {
+          final index = entry.key;
+          final noteEntry = entry.value;
+
+          return Padding(
+            key: ValueKey(noteEntry.id),
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('• ', style: TextStyle(fontSize: 16)),
+                Expanded(
+                  child: widget.isEditable
+                      ? Row(
+                          children: [
+                            Expanded(
+                              child: Focus(
+                                onFocusChange: (hasFocus) {
+                                  if (!hasFocus) {
+                                    _onTextFieldFocusLost();
+                                  }
+                                },
+                                child: TextFormField(
+                                  controller: noteEntry.controller,
+                                  onChanged: (newText) {
+                                    noteEntry.value = newText;       // Store it in memory ✅
                                   },
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
@@ -130,47 +175,28 @@ class _NotesWidgetState extends State<NotesWidget> {
                                   maxLines: null,
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  // First inform the parent
-                                  widget.onNoteDeleted?.call(section, index);
-                                  // Then remove from local controllers
-                                  setState(() {
-                                    controllers[index].dispose();
-                                    controllers.removeAt(index);
-                                  });
-                                },
-                              ),
-                            ],
-                          )
-                        : Text(
-                            controllers[index].text,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                            ),
+                            const SizedBox(width: 4),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _deleteNote(section, index),
+                            ),
+                          ],
+                        )
+                      : Text(noteEntry.controller.text,
+                          style: const TextStyle(fontSize: 16)),
+                ),
+              ],
+            ),
+          );
+        }),
         if (widget.isEditable)
           Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(top: 8),
             child: ElevatedButton.icon(
-              onPressed: () {
-                // First tell the parent we're adding a new note
-                widget.onNoteAdded?.call(section);
-                // Then add a new controller for an empty line locally
-                setState(() {
-                  controllers.add(TextEditingController(text: ''));
-                });
-              },
+              onPressed: () => _addNote(section),
               icon: const Icon(Icons.add),
               label: Text('Add to ${title.toLowerCase()}'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 40),
-              ),
             ),
           ),
       ],
@@ -186,10 +212,7 @@ class _NotesWidgetState extends State<NotesWidget> {
           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Text(
             'Notes',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
         ExpansionPanelList.radio(
@@ -201,14 +224,12 @@ class _NotesWidgetState extends State<NotesWidget> {
                   title: Text(
                     entry.value,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 );
               },
               body: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: _buildNotesList(entry.key, entry.value),
               ),
             );
@@ -216,5 +237,34 @@ class _NotesWidgetState extends State<NotesWidget> {
         ),
       ],
     );
+  }
+}
+
+// Internal note row structure with stable ID and controller
+class _NoteEntry {
+  final String id;
+  String value;
+  final TextEditingController controller;
+
+  _NoteEntry({
+    required this.id,
+    required this.value,
+  }) : controller = TextEditingController(text: value);
+
+  void dispose() {
+    controller.dispose();
+  }
+
+  void updateControllerText() {
+    if (controller.text != value) {
+      controller.text = value;
+    }
+  }
+
+  _NoteEntry copyWith({String? id, String? value}) {
+    final newValue = value ?? this.value;
+    final newEntry = _NoteEntry(id: id ?? this.id, value: newValue);
+    newEntry.controller.text = newValue;
+    return newEntry;
   }
 }

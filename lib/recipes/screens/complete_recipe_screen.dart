@@ -118,7 +118,6 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,7 +150,9 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
                 onTitleChanged: (newTitle) => setState(() => recipe = recipe.copyWith(title: newTitle)),
                 onTotalCookTimeChanged: (newTime) => setState(() => recipe = recipe.copyWith(totalTime: newTime)),
               ),
+
               SizedBox(height: 16),
+
               MoreDetailsWidget(
                 prepTime: recipe.prepTime,
                 cookTime: recipe.cookTime,
@@ -163,8 +164,9 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
                 onRestTimeChanged: (newRestTime) => setState(() => recipe = recipe.copyWith(restTime: newRestTime)),
                 onDescriptionChanged: (newDescription) => setState(() => recipe = recipe.copyWith(description: newDescription)),
               ),
+
               SizedBox(height: 16),
-              // // NOT SURE HOW TO IMPLEMENT?
+              
               IngredientsWidget(
                 isEditable: isEditMode,
                 ingredients: recipe.ingredients,
@@ -174,19 +176,94 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
                   recipe = recipe.copyWith(ingredients: updatedIngredients);
                 }),
               ),
+
               SizedBox(height: 16),
-              EquipmentWidget(equipment: recipe.equipment),
+
+              EquipmentWidget(
+                equipment: recipe.equipment,
+                isEditable: isEditMode,
+                onEquipmentChanged: (updatedEquipment) => setState(() {
+                  recipe = recipe.copyWith(equipment: updatedEquipment);
+                }),
+              ),
+
               SizedBox(height: 16),
+
               InstructionsWidget(
                 instructions: recipe.instructions,
                 isEditable: isEditMode,
+                onSectionTitleChanged: (sectionIndex, newTitle) {
+                  final updated = [...recipe.instructions];
+                  final updatedSection = updated[sectionIndex].copyWith(sectionTitle: newTitle);
+                  updated[sectionIndex] = updatedSection;
+
+                  setState(() {
+                    recipe = recipe.copyWith(instructions: updated);
+                  });
+                },
+                onStepChanged: (sectionIndex, stepIndex, newStep) {
+                  final updated = [...recipe.instructions];
+                  final steps = [...updated[sectionIndex].steps];
+                  steps[stepIndex] = newStep;
+
+                  updated[sectionIndex] = updated[sectionIndex].copyWith(steps: steps);
+
+                  setState(() {
+                    recipe = recipe.copyWith(instructions: updated);
+                  });
+                },
+                onDeleteStep: (sectionIndex, stepIndex) {
+                  final updated = [...recipe.instructions];
+                  final steps = [...updated[sectionIndex].steps];
+                  steps.removeAt(stepIndex);
+
+                  updated[sectionIndex] = updated[sectionIndex].copyWith(steps: steps);
+
+                  setState(() {
+                    recipe = recipe.copyWith(instructions: updated);
+                  });
+                },
+                onDeleteSection: (sectionIndex) {
+                  final updated = [...recipe.instructions]..removeAt(sectionIndex);
+
+                  setState(() {
+                    recipe = recipe.copyWith(instructions: updated);
+                  });
+                },
+                onAddSection: () {
+                  final updated = [...recipe.instructions]
+                    ..add(InstructionSection(sectionTitle: 'New Section', steps: ['New Step']));
+
+                  setState(() {
+                    recipe = recipe.copyWith(instructions: updated);
+                  });
+                },
+                onAddStep: (sectionIndex) {
+                  final updated = [...recipe.instructions];
+                  final steps = [...updated[sectionIndex].steps]..add('New Step');
+
+                  updated[sectionIndex] = updated[sectionIndex].copyWith(steps: steps);
+
+                  setState(() {
+                    recipe = recipe.copyWith(instructions: updated);
+                  });
+                },
               ),
+
               SizedBox(height: 16),
+
               NotesWidget(
                 notes: recipe.notes,
                 isEditable: isEditMode,
+                onNotesChanged: (updatedNotes) {
+                  setState(() {
+                    recipe = recipe.copyWith(notes: updatedNotes);
+                  });
+                },
               ),
+
               SizedBox(height: 16),
+
               NutritionWidget(
                 nutrition: recipe.nutrition,
               ),

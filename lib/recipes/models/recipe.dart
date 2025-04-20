@@ -19,7 +19,7 @@ class Recipe {
   final String description; // Recipe description
   final List<Ingredient> ingredients; // List of ingredients
   final String ingredientsFormat; // Format (e.g., US Customary, Metric)
-  final List<String> equipment; // List of equipment needed
+  final List<EquipmentItem> equipment; // List of equipment needed
   final List<InstructionSection> instructions; // Instructions (divided into sections if applicable)
   Notes notes; // Notes for the recipe
   Nutrition nutrition; // Nutrition details
@@ -71,7 +71,7 @@ class Recipe {
       'description': description,
       'ingredients': ingredients.map((i) => i.toJson()).toList(),
       'ingredientsFormat': ingredientsFormat,
-      'equipment': equipment,
+      'equipment': equipment.map((e) => e.toJson()).toList(),
       'instructions': instructions.map((i) => i.toJson()).toList(),
       'notes': notes.toJson(),
       'nutrition': nutrition.toJson(),
@@ -101,7 +101,9 @@ class Recipe {
           .map((i) => Ingredient.fromJson(i))
           .toList(),
       ingredientsFormat: json['ingredientsFormat'],
-      equipment: List<String>.from(json['equipment']),
+      equipment: (json['equipment'] as List)
+          .map((e) => EquipmentItem.fromJson(e))
+          .toList(),
       instructions: (json['instructions'] as List)
           .map((i) => InstructionSection.fromJson(i))
           .toList(),
@@ -130,7 +132,7 @@ class Recipe {
     String? description,
     List<Ingredient>? ingredients,
     String? ingredientsFormat,
-    List<String>? equipment,
+    List<EquipmentItem>? equipment,
     List<InstructionSection>? instructions,
     Notes? notes,
     Nutrition? nutrition,
@@ -157,7 +159,9 @@ class Recipe {
           ? ingredients.map((i) => i.copyWith()).toList()
           : this.ingredients.map((i) => i.copyWith()).toList(),
       ingredientsFormat: ingredientsFormat ?? this.ingredientsFormat,
-      equipment: equipment != null ? List.from(equipment) : List.from(this.equipment),
+      equipment: equipment != null 
+          ? equipment.map((e) => e.copyWith()).toList()
+          : this.equipment.map((e) => e.copyWith()).toList(),
       instructions: instructions != null
           ? instructions.map((s) => s.copyWith()).toList()
           : this.instructions.map((s) => s.copyWith()).toList(),
@@ -221,6 +225,38 @@ class Ingredient {
       unit: unit ?? this.unit,
       name: name ?? this.name,
     );
+  }
+}
+
+// TODO: CREATE A MASTER EQUIPMENT ID SYSTEM TO ASSIGN UNIQUE IDS TO EQUIPMENT
+class EquipmentItem {
+  final String id;
+  final String name;
+
+  EquipmentItem({
+    String? id,
+    required this.name,
+  }) : id = id ?? const Uuid().v4();
+
+  EquipmentItem copyWith({String? id, String? name}) {
+    return EquipmentItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+    );
+  }
+
+  factory EquipmentItem.fromJson(Map<String, dynamic> json) {
+    return EquipmentItem(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
   }
 }
 
