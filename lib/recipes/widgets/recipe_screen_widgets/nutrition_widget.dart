@@ -125,8 +125,11 @@ class _NutritionWidgetState extends State<NutritionWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Nutrition Info',
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                'Nutrition',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               TextButton.icon(
                 onPressed: () => setState(() => _isExpanded = !_isExpanded),

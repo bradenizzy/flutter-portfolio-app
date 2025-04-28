@@ -13,7 +13,7 @@ class Recipe {
   final String totalTime; // Total time
   final double rating; // Overall rating
   final int reviewsCount; // Number of reviews
-  final int servings; // Number of servings
+  final double servings; // Number of servings
   final String servingsUnit; // Unit for servings (default: "Servings")
   final List<String> tags; // Tags (e.g., "Dinner", "Quick")
   final String description; // Recipe description
@@ -93,7 +93,7 @@ class Recipe {
       totalTime: json['totalTime'],
       rating: json['rating'].toDouble(),
       reviewsCount: json['reviewsCount'],
-      servings: json['servings'],
+      servings: json['servings'].toDouble(),
       servingsUnit: json['servingsUnit'] ?? "Servings",
       tags: List<String>.from(json['tags']),
       description: json['description'],
@@ -126,7 +126,7 @@ class Recipe {
     String? totalTime,
     double? rating,
     int? reviewsCount,
-    int? servings,
+    double? servings,
     String? servingsUnit,
     List<String>? tags,
     String? description,

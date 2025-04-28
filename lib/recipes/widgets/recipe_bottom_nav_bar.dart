@@ -23,7 +23,7 @@ class RecipeBottomNavBar extends StatelessWidget {
         onTap: (index) {
           switch (index) {
             case 0:
-              Navigator.pushNamed(context, '/recipe');
+              Navigator.pushNamedAndRemoveUntil(context, '/recipe', (route) => false);
               break;
             case 1:
               // TODO: implement bottom nav bar options

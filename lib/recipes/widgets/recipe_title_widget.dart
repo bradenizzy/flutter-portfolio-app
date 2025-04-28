@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
 import 'package:flutter_portfolio_app/recipes/screens/recipe_edit_screen.dart';
+import 'package:flutter_portfolio_app/recipes/screens/complete_recipe_screen.dart';
 
 class RecipeTitleWidget extends StatefulWidget {
   final String source; // Source: Camera, Photos, or Manually
@@ -112,7 +113,7 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
       }
 
       // Prepare Recipe object
-      final recipe = Recipe(
+      final placeholderRecipe = Recipe(
         id: recipeId,
         images: imageUrls,
         title: _titleController.text,
@@ -122,7 +123,8 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
         totalTime: '',
         rating: 0.0,
         reviewsCount: 0,
-        servings: 0,
+        servings: 1,
+        servingsUnit: "Servings",
         tags: [],
         description: '',
         ingredients: [],
@@ -137,30 +139,36 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
         isPublic: false,
       );
 
-      // Save to Firestore
+      // // TODO: Integrate with OpenAI API
+      // // Simulate sending images to OpenAI and processing JSON response
+      // // This will be implemented in the future
+
+       // Save to Firestore
       await FirebaseFirestore.instance
           .collection('recipes')
           .doc(recipeId)
-          .set(recipe.toJson());
+          .set(placeholderRecipe.toJson());
 
-      // TODO: Integrate with OpenAI API
-      // Simulate sending images to OpenAI and processing JSON response
-      // This will be implemented in the future
+      // Fetch the fresh recipe from Firestore
+      final fetchedSnapshot = await FirebaseFirestore.instance
+          .collection('recipes')
+          .doc(recipeId)
+          .get();
+
+      final recipe = Recipe.fromJson(fetchedSnapshot.data()!);
 
       // Close loading indicator
       Navigator.of(context).pop();
 
-      
-      // Navigate to RecipeEditScreen without allowing back navigation
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => RecipeEditScreen(recipe: recipe)),
-      // );
+      // Navigate to CompleteRecipeScreen without allowing back navigation
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => RecipeEditScreen(recipe: recipe)),
-        (route) => false, // Clears the stack
+        MaterialPageRoute(
+          builder: (context) => CompleteRecipeScreen(recipe: recipe),
+        ),
+        (Route<dynamic> route) => false, // remove all previous routes
       );
+      
     } catch (e) {
       // Handle errors
       Navigator.of(context).pop(); // Close loading indicator

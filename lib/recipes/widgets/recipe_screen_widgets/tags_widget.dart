@@ -69,7 +69,8 @@ class _TagsWidgetState extends State<TagsWidget> {
         children: [
           Text(
             'Tags',
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: TextStyle(
+              fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),

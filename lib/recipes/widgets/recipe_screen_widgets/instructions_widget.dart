@@ -1,5 +1,3 @@
-// instructions_widget.dart
-
 import 'package:flutter/material.dart';
 import '../../models/recipe.dart';
 
@@ -32,11 +30,14 @@ class InstructionsWidget extends StatefulWidget {
 class _InstructionsWidgetState extends State<InstructionsWidget> {
   late List<List<TextEditingController>> _stepControllers;
   late List<TextEditingController> _sectionControllers;
+  bool _forceExpand = false;
+  List<bool> _expandedSections = [];
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
+    _expandedSections = List.generate(widget.instructions.length, (index) => false);
   }
 
   @override
@@ -47,6 +48,11 @@ class _InstructionsWidgetState extends State<InstructionsWidget> {
           oldWidget.instructions[widget.instructions.indexOf(section)].steps.length)) {
       _disposeControllers();
       _initializeControllers();
+      // Update expanded sections list when number of sections changes
+      if (widget.instructions.length != oldWidget.instructions.length) {
+        _expandedSections = List.generate(widget.instructions.length, (index) => 
+          index < _expandedSections.length ? _expandedSections[index] : false);
+      }
     }
   }
 
@@ -79,30 +85,19 @@ class _InstructionsWidgetState extends State<InstructionsWidget> {
   }
 
   void _updateControllersAfterDelete(int sectionIndex, int stepIndex) {
-    // Dispose the controller for the deleted step
     _stepControllers[sectionIndex][stepIndex].dispose();
-    
-    // Remove the controller from the list
     _stepControllers[sectionIndex].removeAt(stepIndex);
-    
-    // Call the parent's delete callback
     widget.onDeleteStep?.call(sectionIndex, stepIndex);
   }
 
   void _addStepController(int sectionIndex) {
-    // Add a new controller for the new step
     _stepControllers[sectionIndex].add(TextEditingController(text: ''));
-    
-    // Call the parent's add callback
     widget.onAddStep?.call(sectionIndex);
   }
 
   void _addSectionController() {
-    // Add new controllers for the new section
     _sectionControllers.add(TextEditingController(text: 'New Section'));
     _stepControllers.add([TextEditingController(text: 'New Step')]);
-    
-    // Call the parent's add callback
     widget.onAddSection?.call();
   }
 
@@ -112,112 +107,151 @@ class _InstructionsWidgetState extends State<InstructionsWidget> {
     super.dispose();
   }
 
+  Widget _buildSectionHeader(int sectionIndex) {
+    return ListTile(
+      title: widget.isEditable
+          ? Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _sectionControllers[sectionIndex],
+                    onChanged: (value) => widget.onSectionTitleChanged?.call(sectionIndex, value),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Section Title',
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => widget.onDeleteSection?.call(sectionIndex),
+                ),
+              ],
+            )
+          : Text(
+              widget.instructions[sectionIndex].sectionTitle,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+    );
+  }
+
+  Widget _buildSectionBody(int sectionIndex) {
+    final section = widget.instructions[sectionIndex];
+    return Column(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: section.steps.length,
+          itemBuilder: (context, stepIndex) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${stepIndex + 1}. ',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Expanded(
+                    child: widget.isEditable
+                        ? TextField(
+                            controller: _stepControllers[sectionIndex][stepIndex],
+                            onChanged: (value) => widget.onStepChanged?.call(
+                              sectionIndex,
+                              stepIndex,
+                              value,
+                            ),
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                            ),
+                            maxLines: null,
+                          )
+                        : Text(section.steps[stepIndex]),
+                  ),
+                  if (widget.isEditable)
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _updateControllersAfterDelete(sectionIndex, stepIndex),
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
+        if (widget.isEditable)
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton.icon(
+              onPressed: () => _addStepController(sectionIndex),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Step'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            'Instructions',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Instructions',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _forceExpand = !_forceExpand;
+                    if (_forceExpand) {
+                      _expandedSections = List.generate(widget.instructions.length, (index) => true);
+                    } else {
+                      _expandedSections = List.generate(widget.instructions.length, (index) => false);
+                    }
+                  });
+                },
+                child: Text(
+                  _forceExpand ? 'Collapse All' : 'See All',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        ExpansionPanelList.radio(
+        ExpansionPanelList(
+          expansionCallback: (int index, bool isExpanded) {
+            setState(() {
+              _expandedSections[index] = isExpanded;
+            });
+          },
+          expandedHeaderPadding: EdgeInsets.zero,
           children: List.generate(widget.instructions.length, (sectionIndex) {
             final section = widget.instructions[sectionIndex];
-            return ExpansionPanelRadio(
-              value: '$sectionIndex-${section.sectionTitle}',
+            return ExpansionPanel(
+              isExpanded: _expandedSections[sectionIndex],
+              canTapOnHeader: true,
               headerBuilder: (context, isExpanded) {
-                return ListTile(
-                  title: widget.isEditable
-                      ? Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _sectionControllers[sectionIndex],
-                                onChanged: (value) => widget.onSectionTitleChanged?.call(sectionIndex, value),
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  labelText: 'Section Title',
-                                ),
-                              ),
-                            ),
-                            if (widget.isEditable)
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => widget.onDeleteSection?.call(sectionIndex),
-                              ),
-                          ],
-                        )
-                      : Text(
-                          section.sectionTitle,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                );
+                return _buildSectionHeader(sectionIndex);
               },
-              body: Column(
-                children: [
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: section.steps.length,
-                    itemBuilder: (context, stepIndex) {
-                      return Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${stepIndex + 1}. ',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Expanded(
-                              child: widget.isEditable
-                                  ? TextField(
-                                      controller: _stepControllers[sectionIndex][stepIndex],
-                                      onChanged: (value) => widget.onStepChanged?.call(
-                                        sectionIndex,
-                                        stepIndex,
-                                        value,
-                                      ),
-                                      decoration: const InputDecoration(
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      maxLines: null,
-                                    )
-                                  : Text(section.steps[stepIndex]),
-                            ),
-                            if (widget.isEditable)
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _updateControllersAfterDelete(sectionIndex, stepIndex),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  if (widget.isEditable)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: ElevatedButton.icon(
-                        onPressed: () => _addStepController(sectionIndex),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add Step'),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 50),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              body: _buildSectionBody(sectionIndex),
             );
-          }).toList(),
+          }),
         ),
         if (widget.isEditable)
           Padding(
