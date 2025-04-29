@@ -64,7 +64,7 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
 
   void _updateServings(String newServings) {
     final parsed = double.tryParse(newServings);
-    if (parsed != null) {
+    if (parsed != null && parsed > 0) {
       setState(() {
         _editableServings = parsed;
       });
@@ -72,17 +72,33 @@ class _IngredientsWidgetState extends State<IngredientsWidget> {
     }
   }
 
+  void _updateServingsUnit(String newUnit) {
+    final cleaned = newUnit.trim();
+    // Check that input is non-empty, not too long, and contains no numbers
+    if (cleaned.length <= 30 && 
+        !cleaned.contains(RegExp(r'[0-9]'))) {
+      setState(() {
+        widget.onServingsUnitChanged?.call(cleaned);
+      });
+    } else {
+      // Reset to default "Servings" and show error message
+      setState(() {
+        widget.onServingsUnitChanged?.call("Servings");
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Servings unit should not contain numbers.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+  
   void _updateIngredients(List<Ingredient> newIngredients) {
     setState(() {
       _editableIngredients = newIngredients;
     });
     widget.onIngredientsChanged?.call(newIngredients);
-  }
-
-  void _updateServingsUnit(String newServingsUnit) {
-    setState(() {
-      widget.onServingsUnitChanged?.call(newServingsUnit);
-    });
   }
 
   @override

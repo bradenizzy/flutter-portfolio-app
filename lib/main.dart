@@ -27,7 +27,6 @@ import 'recipes/screens/complete_recipe_screen.dart';
 import 'recipes/models/recipe.dart';
 import 'recipes/services/recipe_service.dart';
 
-
 void main() async {
   //debugPaintPointersEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();

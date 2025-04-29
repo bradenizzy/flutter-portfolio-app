@@ -7,6 +7,8 @@ class UserProfile {
   final String phone;
   final String profileImageUrl;
   final Preferences preferences;
+  final List<String> favoriteRecipeIds;
+  final List<String> userRecipeIds;
 
   UserProfile({
     required this.userId,
@@ -16,6 +18,8 @@ class UserProfile {
     this.phone = '',
     this.profileImageUrl = '',
     required this.preferences,
+    this.favoriteRecipeIds = const [],
+    this.userRecipeIds = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -27,6 +31,8 @@ class UserProfile {
       'phone': phone,
       'profileImageUrl': profileImageUrl,
       'preferences': preferences.toMap(),
+      'favoriteRecipeIds': favoriteRecipeIds,
+      'userRecipeIds': userRecipeIds,
     };
   }
 
@@ -39,6 +45,8 @@ class UserProfile {
       phone: map['phone'] as String? ?? '',
       profileImageUrl: map['profileImageUrl'] as String? ?? '',
       preferences: Preferences.fromMap(map['preferences'] as Map<String, dynamic>? ?? {}),
+      favoriteRecipeIds: map['favoriteRecipeIds'] as List<String>? ?? [],
+      userRecipeIds: map['userRecipeIds'] as List<String>? ?? [],
     );
   }
 }

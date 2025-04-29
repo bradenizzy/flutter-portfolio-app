@@ -1,9 +1,10 @@
 // recipie_home.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_portfolio_app/recipes/widgets/new_recipe_button.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/new_recipe_widgets/new_recipe_button.dart';
 import 'package:flutter_portfolio_app/recipes/services/recipe_service.dart';
 import 'package:flutter_portfolio_app/recipes/screens/complete_recipe_screen.dart';
 import 'package:flutter_portfolio_app/recipes/screens/loading_screen.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_bottom_nav_bar.dart';
 
 class RecipieHome extends StatelessWidget {
   final RecipeService recipeService = RecipeService();
@@ -46,6 +47,7 @@ class RecipieHome extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: RecipeBottomNavBar(),
     );
   }
 }

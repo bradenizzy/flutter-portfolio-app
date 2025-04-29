@@ -1,8 +1,8 @@
 // new_recipe_button.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_portfolio_app/recipes/widgets/recipe_source_selection.dart';
-import 'package:flutter_portfolio_app/recipes/widgets/recipe_title_widget.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/new_recipe_widgets/recipe_source_selection.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/new_recipe_widgets/recipe_title_widget.dart';
 
 class NewRecipeButton extends StatelessWidget {
   final BuildContext context;
