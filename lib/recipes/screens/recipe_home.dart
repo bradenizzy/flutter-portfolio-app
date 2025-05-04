@@ -8,6 +8,7 @@ import 'package:flutter_portfolio_app/recipes/widgets/recipe_bottom_nav_bar.dart
 
 class RecipieHome extends StatelessWidget {
   final RecipeService recipeService = RecipeService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,3 +1,5 @@
+// TODO: MAKE MY_RECIPES_SCREEN LIST
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +28,8 @@ import 'recipes/screens/sign_in_screen.dart';
 import 'recipes/screens/complete_recipe_screen.dart';
 import 'recipes/models/recipe.dart';
 import 'recipes/services/recipe_service.dart';
-
+import 'recipes/providers/user_profile_provider.dart';
+import 'recipes/screens/favorites_screen.dart';
 void main() async {
   //debugPaintPointersEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +43,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => GameProvider()),
         ChangeNotifierProvider(create: (_) => StatsProvider()),
         ChangeNotifierProvider(create: (_) => RecipeProvider()),
+        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
       ],
       child: MyPortfolioApp(),
     ),
@@ -73,6 +77,7 @@ class MyPortfolioApp extends StatelessWidget {
           '/game_results': (context) => GameResultsScreen(),
           '/chef_chat': (context) => ChefChatScreen(),
           '/sign_in': (context) => SignInScreen(),
+          '/favorites': (context) => FavoritesScreen(),
         },
     );
   }

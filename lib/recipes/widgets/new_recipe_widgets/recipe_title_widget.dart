@@ -143,11 +143,14 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
       // // Simulate sending images to OpenAI and processing JSON response
       // // This will be implemented in the future
 
-       // Save to Firestore
+      // Save to Firestore
       await FirebaseFirestore.instance
           .collection('recipes')
           .doc(recipeId)
           .set(placeholderRecipe.toJson());
+
+      // Add recipeId to user's userRecipeIds list
+      await _addRecipeToUserList(recipeId);
 
       // Fetch the fresh recipe from Firestore
       final fetchedSnapshot = await FirebaseFirestore.instance
@@ -175,6 +178,26 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save recipe: $e')),
       );
+    }
+  }
+
+  //TODO: consider if we should also update our UserProfile provider with this id?
+  Future<void> _addRecipeToUserList(String recipeId) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      final userRef = FirebaseFirestore.instance.collection('user_profiles').doc(userId);
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final userDoc = await transaction.get(userRef);
+        if (userDoc.exists) {
+          List<String> userRecipeIds = List<String>.from(userDoc.data()?['userRecipeIds'] ?? []);
+          if (!userRecipeIds.contains(recipeId)) {
+            userRecipeIds.add(recipeId);
+            transaction.update(userRef, {'userRecipeIds': userRecipeIds});
+          }
+        } else {
+          transaction.set(userRef, {'userRecipeIds': [recipeId]});
+        }
+      });
     }
   }
 

@@ -45,8 +45,36 @@ class UserProfile {
       phone: map['phone'] as String? ?? '',
       profileImageUrl: map['profileImageUrl'] as String? ?? '',
       preferences: Preferences.fromMap(map['preferences'] as Map<String, dynamic>? ?? {}),
-      favoriteRecipeIds: map['favoriteRecipeIds'] as List<String>? ?? [],
-      userRecipeIds: map['userRecipeIds'] as List<String>? ?? [],
+      favoriteRecipeIds: map['favoriteRecipeIds'] != null
+        ? List<String>.from(map['favoriteRecipeIds'])
+        : <String>[],
+      userRecipeIds: map['userRecipeIds'] != null
+      ? List<String>.from(map['userRecipeIds'])
+      : <String>[],
+    );
+  }
+
+  UserProfile copyWith({
+    String? userId,
+    String? firstName,
+    String? lastName,
+    String? email,
+    String? phone,
+    String? profileImageUrl,
+    Preferences? preferences,
+    List<String>? favoriteRecipeIds,
+    List<String>? userRecipeIds,
+  }) {
+    return UserProfile(
+      userId: userId ?? this.userId,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      preferences: preferences ?? this.preferences,
+      favoriteRecipeIds: favoriteRecipeIds ?? this.favoriteRecipeIds,
+      userRecipeIds: userRecipeIds ?? this.userRecipeIds,
     );
   }
 }

@@ -31,7 +31,7 @@ class RecipeBottomNavBar extends StatelessWidget {
               break;
             case 2:
               // TODO: implement bottom nav bar options
-              // Navigator.pushNamed(context, '/favorites');
+              Navigator.pushNamed(context, '/favorites');
               break;
           }
         },

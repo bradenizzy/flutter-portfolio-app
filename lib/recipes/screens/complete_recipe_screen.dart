@@ -15,6 +15,9 @@ import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/tags
 import 'package:flutter_portfolio_app/recipes/services/recipe_service.dart';
 import 'loading_screen.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_bottom_nav_bar.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/favorite_button_widget.dart';
+import 'package:flutter_portfolio_app/recipes/providers/user_profile_provider.dart';
+import 'package:provider/provider.dart';
 
 class CompleteRecipeScreen extends StatefulWidget {
   final Recipe recipe;
@@ -29,6 +32,7 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
   late Recipe recipe;
   late Recipe originalRecipe;
   final RecipeService recipeService = RecipeService();
+
 
   @override
   void initState() {
@@ -120,7 +124,10 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Recipe'),
-        actions: [
+        actions: [      
+          FavoriteButtonWidget(
+            recipeId: recipe.id,
+          ),
           IconButton(
             icon: Icon(isEditMode ? Icons.close : Icons.edit),
             onPressed: _toggleEditMode,

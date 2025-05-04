@@ -50,6 +50,34 @@ class RecipeService {
     }
   }
 
+  Future<List<Recipe>> fetchRecipesByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+
+    // Firestore whereIn supports up to 10 items per query
+    final List<List<String>> chunks = [];
+    for (var i = 0; i < ids.length; i += 10) {
+      chunks.add(ids.sublist(i, i + 10 > ids.length ? ids.length : i + 10));
+    }
+
+    final List<Recipe> fetched = [];
+    for (var chunk in chunks) {
+      final snapshot = await _firestore
+          .collection('recipes')
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+      fetched.addAll(snapshot.docs.map(
+        (doc) => Recipe.fromJson(doc.data() as Map<String, dynamic>),
+      ));
+    }
+
+    // Preserve the order of incoming IDs
+    final mapById = {for (var r in fetched) r.id: r};
+    return ids
+        .map((id) => mapById[id])
+        .whereType<Recipe>()
+        .toList();
+  }
+
   // TODO: For when we implement a "revert to original" feature
   // Future<Recipe> fetchOriginalBackup(String recipeId) async {
   //   final doc = await _firestore.collection('recipes_backup').doc(recipeId).get();

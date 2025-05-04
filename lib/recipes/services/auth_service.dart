@@ -7,6 +7,24 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Future<UserProfile> signInWithEmailAndReturnProfile(String email, String password) async {
+    try {
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final userId = userCredential.user!.uid;
+
+      // Fetch the profile from Firestore
+      final doc = await _firestore.collection('user_profiles').doc(userId).get();
+      if (!doc.exists) throw Exception("User profile not found");
+
+      return UserProfile.fromMap(doc.data()!);
+    } catch (e) {
+      rethrow;
+    }
+  }
+  
   Future<UserCredential> signInWithEmailAndPassword(String email, String password) async {
     try {
       final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
