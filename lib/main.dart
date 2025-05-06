@@ -33,6 +33,7 @@ import 'recipes/providers/user_profile_provider.dart';
 import 'recipes/screens/favorites_screen.dart';
 import 'recipes/providers/recipe_lists_provider.dart';
 import 'recipes/screens/cookbooks_screen.dart';
+import 'recipes/screens/user_profile_screen.dart';
 void main() async {
   //debugPaintPointersEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +84,7 @@ class MyPortfolioApp extends StatelessWidget {
           '/sign_in': (context) => SignInScreen(),
           '/favorites': (context) => FavoritesScreen(),
           '/cookbooks': (context) => CookbooksScreen(),
+          '/profile': (context) => UserProfileScreen(),
         },
     );
   }

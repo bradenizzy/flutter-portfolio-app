@@ -101,4 +101,14 @@ class Preferences {
       darkMode: map['darkMode'],
     );
   }
+
+  Preferences copyWith({
+    bool? notificationsEnabled,
+    bool? darkMode,
+  }) {
+    return Preferences(
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      darkMode: darkMode ?? this.darkMode,
+    );
+  }
 }
