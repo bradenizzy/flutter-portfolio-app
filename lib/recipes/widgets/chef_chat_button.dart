@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';  
 import 'package:provider/provider.dart';
-import 'package:flutter_portfolio_app/recipes/providers/recipe_provider.dart';
+import 'package:flutter_portfolio_app/recipes/providers/chef_provider.dart';
 
 class ChefChatButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Access the RecipeProvider
-    final recipeProvider = Provider.of<RecipeProvider>(context);
+    final recipeProvider = Provider.of<ChefProvider>(context);
 
     return Center(
       child: Container(

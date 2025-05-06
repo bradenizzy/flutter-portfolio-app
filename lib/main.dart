@@ -1,7 +1,8 @@
-// TODO: MAKE MY_RECIPES_SCREEN LIST
+// TODO: TEST COOKBOOKS SCREEN
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'portfolio_app/other/firebase_options.dart';
 import 'portfolio_app/screens/home_screen.dart';
@@ -21,7 +22,7 @@ import 'blackjack/screens/split_hands_mode.dart';
 import 'blackjack/screens/soft_hands_mode.dart';
 import 'blackjack/screens/double_down_mode.dart';
 import 'recipes/screens/chef_chat_screen.dart';
-import 'recipes/providers/recipe_provider.dart';
+import 'recipes/providers/chef_provider.dart';
 import 'dart:developer' as developer;
 import 'package:flutter/rendering.dart';
 import 'recipes/screens/sign_in_screen.dart';
@@ -30,6 +31,8 @@ import 'recipes/models/recipe.dart';
 import 'recipes/services/recipe_service.dart';
 import 'recipes/providers/user_profile_provider.dart';
 import 'recipes/screens/favorites_screen.dart';
+import 'recipes/providers/recipe_lists_provider.dart';
+import 'recipes/screens/cookbooks_screen.dart';
 void main() async {
   //debugPaintPointersEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,8 +45,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AppData()),
         ChangeNotifierProvider(create: (_) => GameProvider()),
         ChangeNotifierProvider(create: (_) => StatsProvider()),
-        ChangeNotifierProvider(create: (_) => RecipeProvider()),
+        ChangeNotifierProvider(create: (_) => ChefProvider()),
         ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+        ChangeNotifierProvider(create: (_) => RecipeListsProvider(recipeService: RecipeService(), auth: FirebaseAuth.instance)),
       ],
       child: MyPortfolioApp(),
     ),
@@ -78,6 +82,7 @@ class MyPortfolioApp extends StatelessWidget {
           '/chef_chat': (context) => ChefChatScreen(),
           '/sign_in': (context) => SignInScreen(),
           '/favorites': (context) => FavoritesScreen(),
+          '/cookbooks': (context) => CookbooksScreen(),
         },
     );
   }

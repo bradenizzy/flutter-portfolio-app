@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import '../services/chef_service.dart';
 
-class RecipeProvider extends ChangeNotifier {
+class ChefProvider extends ChangeNotifier {
   final ChefService _chefService = ChefService();
   bool _isSessionActive = false;
 
@@ -37,7 +37,7 @@ class RecipeProvider extends ChangeNotifier {
     }
   }
 }
-// class RecipeProvider extends ChangeNotifier {
+// class ChefProvider extends ChangeNotifier {
 //   bool _isSessionActive = false;
 //   bool get isSessionActive => _isSessionActive;
 
