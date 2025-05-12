@@ -28,7 +28,7 @@ class CustomDrawerService {
   Future<void> signOut(BuildContext context) async {
     try {
       await _authService.signOut();
-      Navigator.of(context).pushReplacementNamed('/sign-in'); // Navigate to the sign-in screen
+      Navigator.of(context).pushNamedAndRemoveUntil('/sign_in', (route) => false);
     } catch (e) {
       // Handle errors if needed
       print("Error signing out: $e");

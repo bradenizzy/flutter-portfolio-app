@@ -1,6 +1,5 @@
 // TODO: TEST COOKBOOKS SCREEN
-// TODO: TEST DRAWER AND USER PROFILE SCREEN
-// TODO: TEST ONBOARDING SCREENS
+
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -37,8 +36,9 @@ import 'recipes/providers/recipe_lists_provider.dart';
 import 'recipes/screens/cookbooks_screen.dart';
 import 'recipes/screens/user_profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'recipes/screens/onboarding/onboarding_screen1.dart';
+import 'recipes/screens/onboarding/onboarding_screen.dart';
 import 'recipes/screens/onboarding/splash_screen.dart';
+import 'recipes/screens/onboarding/onboarding_screen.dart';
 void main() async {
   //debugPaintPointersEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,6 +94,7 @@ class MyPortfolioApp extends StatelessWidget {
           '/favorites': (context) => FavoritesScreen(),
           '/cookbooks': (context) => CookbooksScreen(),
           '/profile': (context) => UserProfileScreen(),
+          '/onboarding': (context) => OnboardingScreen(),
         },
     );
   }

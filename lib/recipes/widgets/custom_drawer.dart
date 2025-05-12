@@ -30,7 +30,7 @@ class CustomDrawer extends StatelessWidget {
             title: Text('Home'),
             onTap: () {
               Navigator.pop(context); // Close the drawer
-              Navigator.pushNamed(context, '/home');
+              Navigator.pushNamed(context, '/recipe');
             },
           ),
           ListTile(
@@ -44,7 +44,8 @@ class CustomDrawer extends StatelessWidget {
             leading: Icon(Icons.settings),
             title: Text('Settings'),
             onTap: () {
-              Navigator.pushNamed(context, '/settings');
+              //TODO: IMPLEMENT SETTINGS!
+             //Navigator.pushNamed(context, '/settings');
             },
           ),
           ListTile(

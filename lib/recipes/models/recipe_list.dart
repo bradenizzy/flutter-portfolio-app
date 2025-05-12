@@ -7,12 +7,14 @@ class RecipeList {
   final String title;
   final String ownerId; // For sharing & permissions
   final List<String> recipeIds;
+  final int order; // New attribute for ordering lists
 
   RecipeList({
     required this.listId,
     required this.title,
     required this.ownerId,
     required this.recipeIds,
+    required this.order,
   });
 
   factory RecipeList.fromDoc(DocumentSnapshot doc) {
@@ -22,6 +24,7 @@ class RecipeList {
       title: data['title'] ?? '',
       ownerId: data['ownerId'] ?? '',
       recipeIds: List<String>.from(data['recipeIds'] ?? []),
+      order: data['order'] ?? 0,
     );
   }
 
@@ -31,15 +34,27 @@ class RecipeList {
       'title': title,
       'ownerId': ownerId,
       'recipeIds': recipeIds,
+      'order': order,
     };
   }
 
-  RecipeList copyWith({String? title, List<String>? recipeIds}) {
+  factory RecipeList.fromMap(Map<String, dynamic> map, String id) {
+    return RecipeList(
+      listId: id,
+      title: map['title'] ?? '',
+      ownerId: map['ownerId'] ?? '',
+      recipeIds: List<String>.from(map['recipeIds'] ?? []),
+      order: map['order'] ?? 0,
+    );
+  }
+
+  RecipeList copyWith({String? title, List<String>? recipeIds, int? order}) {
     return RecipeList(
       listId: listId,
       title: title ?? this.title,
       ownerId: ownerId,
       recipeIds: recipeIds ?? this.recipeIds,
+      order: order ?? this.order,
     );
   }
 }

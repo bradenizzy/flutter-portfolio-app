@@ -50,6 +50,7 @@ dependencies:
   permission_handler: ^11.3.1
   flutter_rating_bar: ^4.0.1
   lottie: ^3.3.1
+  flutter_native_splash: ^2.4.6
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -81,7 +82,7 @@ flutter:
     - assets/onboarding/upload_recipe.png
     - assets/onboarding/chefast.png
     - assets/onboarding/letscook.png
-
+    - assets/splash/logo.png
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -112,3 +113,14 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_native_splash:
+  color: "#ffffff" # or your brand background color
+  image: assets/splash/logo.png # your splash image path
+  # branding: assets/splash/branding.png # optional small logo/text below
+
+  android_12:
+    image: assets/splash/logo.png
+    icon_background_color: "#ffffff"
+
+  web: false

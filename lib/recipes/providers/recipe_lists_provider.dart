@@ -5,11 +5,13 @@ import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
 import 'package:flutter_portfolio_app/recipes/models/recipe_list.dart';
 import 'package:flutter_portfolio_app/recipes/services/recipe_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Provider: RecipeListsProvider
 class RecipeListsProvider extends ChangeNotifier {
   final RecipeService recipeService;
   final FirebaseAuth auth;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   List<RecipeList> _lists = [];
   Map<String, List<Recipe>> _listRecipes = {}; // Map listId -> list of full Recipe models
@@ -20,27 +22,51 @@ class RecipeListsProvider extends ChangeNotifier {
   RecipeListsProvider({required this.recipeService, required this.auth});
 
   Future<void> loadLists() async {
-    final userId = auth.currentUser?.uid;
-    if (userId == null) return;
+      final user = auth.currentUser;
+      if (user == null) return;
 
-    _lists = await recipeService.fetchRecipeLists(userId);
-    _listRecipes.clear();
+      final snapshot = await _firestore
+          .collection('user_profiles')
+          .doc(user.uid)
+          .collection('lists')
+          .orderBy('order') // 📌 sort by custom order
+          .get();
 
-    for (final list in _lists) {
-      final recipes = await recipeService.fetchRecipesByIds(list.recipeIds);
-      _listRecipes[list.listId] = recipes;
+      _lists = snapshot.docs.map((doc) {
+        return RecipeList.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+      }).toList();
+
+      // Optional: load associated recipes here if needed
+      notifyListeners();
     }
 
+  Future<void> createNewList(String title) async {
+    final user = auth.currentUser;
+    if (user == null) return;
+
+    // Get the highest current order value
+    int maxOrder = _lists.isEmpty ? 0 : _lists.map((list) => list.order).reduce((a, b) => a > b ? a : b);
+
+    final newListRef = _firestore
+        .collection('user_profiles')
+        .doc(user.uid)
+        .collection('lists')
+        .doc(); // auto-ID
+
+    final newList = RecipeList(
+      listId: newListRef.id,
+      title: title,
+      order: maxOrder + 1,
+      ownerId: user.uid,
+      recipeIds: [],
+    );
+
+    await newListRef.set(newList.toMap());
+
+    _lists.add(newList);
     notifyListeners();
   }
-
-  Future<void> createNewList(String title) async {
-    final userId = auth.currentUser?.uid;
-    if (userId == null) return;
-    await recipeService.createRecipeList(userId, title);
-    await loadLists();
-  }
-
+ 
   Future<void> addRecipeToList(String listId, String recipeId) async {
     final userId = auth.currentUser?.uid;
     if (userId == null) return;
@@ -58,9 +84,51 @@ class RecipeListsProvider extends ChangeNotifier {
   Future<void> deleteList(String listId) async {
     final userId = auth.currentUser?.uid;
     if (userId == null) return;
+
     await recipeService.deleteRecipeList(userId, listId);
-    await loadLists();
+    _lists.removeWhere((list) => list.listId == listId);
+
+    // Reindex remaining lists
+    for (int i = 0; i < _lists.length; i++) {
+      _lists[i] = _lists[i].copyWith(order: i);
+      await _firestore
+          .collection('user_profiles')
+          .doc(userId)
+          .collection('lists')
+          .doc(_lists[i].listId)
+          .update({'order': i});
+    }
+
+    notifyListeners();
   }
+
+  // Future<void> deleteList(String listId) async {
+  //   final userId = auth.currentUser?.uid;
+  //   if (userId == null) return;
+  //   await recipeService.deleteRecipeList(userId, listId);
+  //   await loadLists();
+  // }
+
+  Future<void> reorderLists(int oldIndex, int newIndex) async {
+    if (newIndex > oldIndex) newIndex -= 1;
+
+    final list = _lists.removeAt(oldIndex);
+    _lists.insert(newIndex, list);
+
+    // Reindex order fields
+    for (int i = 0; i < _lists.length; i++) {
+      _lists[i] = _lists[i].copyWith(order: i);
+      await _firestore
+          .collection('user_profiles')
+          .doc(auth.currentUser!.uid)
+          .collection('lists')
+          .doc(_lists[i].listId)
+          .update({'order': i});
+    }
+
+    notifyListeners();
+  }
+
 
   void clear() {
     _lists.clear();

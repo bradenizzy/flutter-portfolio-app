@@ -80,7 +80,7 @@ class UserProfileScreen extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: () async {
               await _authService.signOut();
-              Navigator.of(context).pushNamedAndRemoveUntil('/sign-in', (route) => false);
+              Navigator.of(context).pushNamedAndRemoveUntil('/sign_in', (route) => false);
             },
             icon: Icon(Icons.logout),
             label: Text("Log Out"),

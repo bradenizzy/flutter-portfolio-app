@@ -26,8 +26,7 @@ class RecipeBottomNavBar extends StatelessWidget {
               Navigator.pushNamedAndRemoveUntil(context, '/recipe', (route) => false);
               break;
             case 1:
-              // TODO: implement bottom nav bar options
-              // Navigator.pushNamed(context, '/my_recipes');
+              Navigator.pushNamed(context, '/cookbooks');
               break;
             case 2:
               // TODO: implement bottom nav bar options
