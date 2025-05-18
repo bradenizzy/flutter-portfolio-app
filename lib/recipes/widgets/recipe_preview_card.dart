@@ -1,7 +1,12 @@
 // recipe_preview.dart
 
+// TODO: implement the menu item functions
+// TODO: remove a recipe from a list using the menu?
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/recipe.dart';
+import '../providers/user_profile_provider.dart';
 
 /// Shows a thumbnail, title, subtitle, unfavorite button, and an overflow menu for actions.
 class RecipePreviewCard extends StatelessWidget {
@@ -72,14 +77,19 @@ class RecipePreviewCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Unfavorite button
-              IconButton(
-                icon: Icon(
-                  Icons.favorite,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                onPressed: onUnfavorite,
-                tooltip: 'Remove from favorites',
+              // Favorite button
+              Consumer<UserProfileProvider>(
+                builder: (context, userProfileProvider, child) {
+                  final isFavorited = userProfileProvider.favoriteRecipes.any((r) => r.id == recipe.id);
+                  return IconButton(
+                    icon: Icon(
+                      isFavorited ? Icons.favorite : Icons.favorite_border,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    onPressed: onUnfavorite,
+                    tooltip: isFavorited ? 'Remove from favorites' : 'Add to favorites',
+                  );
+                },
               ),
               // Overflow menu for additional actions
               PopupMenuButton<String>(
@@ -92,6 +102,9 @@ class RecipePreviewCard extends StatelessWidget {
                     case 'add':
                       if (onAddToList != null) onAddToList!();
                       break;
+                    case 'remove':
+                      //if (onRemoveFromList != null) onRemoveFromList!();
+                      break;
                   }
                 },
                 itemBuilder: (ctx) => [
@@ -102,6 +115,10 @@ class RecipePreviewCard extends StatelessWidget {
                   PopupMenuItem(
                     value: 'add',
                     child: Text('Add to List'),
+                  ),
+                  PopupMenuItem(
+                    value: 'remove',
+                    child: Text('Remove from List'),
                   ),
                 ],
               ),

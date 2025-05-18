@@ -36,7 +36,16 @@ class RecipeListsProvider extends ChangeNotifier {
         return RecipeList.fromMap(doc.data() as Map<String, dynamic>, doc.id);
       }).toList();
 
-      // Optional: load associated recipes here if needed
+      // Load recipes for each list
+      for (var list in _lists) {
+        if (list.recipeIds.isNotEmpty) {
+          final recipes = await recipeService.fetchRecipesByIds(list.recipeIds);
+          _listRecipes[list.listId] = recipes;
+        } else {
+          _listRecipes[list.listId] = [];
+        }
+      }
+
       notifyListeners();
     }
 
@@ -81,6 +90,20 @@ class RecipeListsProvider extends ChangeNotifier {
     await loadLists();
   }
 
+  void removeRecipeFromLists(String recipeId) {
+    _listRecipes.forEach((listId, recipes) {
+      _listRecipes[listId] = recipes.where((r) => r.id != recipeId).toList();
+    });
+
+    _lists = _lists.map((list) {
+      return list.copyWith(
+        recipeIds: list.recipeIds.where((id) => id != recipeId).toList(),
+      );
+    }).toList();
+
+    notifyListeners();
+  }
+
   Future<void> deleteList(String listId) async {
     final userId = auth.currentUser?.uid;
     if (userId == null) return;
@@ -102,13 +125,6 @@ class RecipeListsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Future<void> deleteList(String listId) async {
-  //   final userId = auth.currentUser?.uid;
-  //   if (userId == null) return;
-  //   await recipeService.deleteRecipeList(userId, listId);
-  //   await loadLists();
-  // }
-
   Future<void> reorderLists(int oldIndex, int newIndex) async {
     if (newIndex > oldIndex) newIndex -= 1;
 
@@ -129,10 +145,11 @@ class RecipeListsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   void clear() {
     _lists.clear();
     _listRecipes.clear();
     notifyListeners();
   }
+
+  // TODO: add an UNDO function to the delete list function???
 }

@@ -59,17 +59,35 @@ class AuthService {
   }
 
   // Private method to create an initial user profile in Firestore
-  Future<void> _createInitialUserProfile(String userId, String email, String firstName, String lastName, String phone, String? profileImageUrl) async {
-    UserProfile profile = UserProfile(
+  Future<void> _createInitialUserProfile(
+    String userId, 
+    String email, 
+    String firstName, 
+    String lastName, 
+    String phone, 
+    String? profileImageUrl
+  ) async {
+    final UserProfile profile = UserProfile(
       userId: userId,
       firstName: firstName,
       lastName: lastName,
       email: email,
-      phone: phone ?? '',
+      phone: phone,
       profileImageUrl: profileImageUrl ?? '',
       preferences: Preferences(notificationsEnabled: true, darkMode: false),
     );
-    await _firestore.collection('user_profiles').doc(userId).set(profile.toMap());
+    
+    final userDocRef = _firestore.collection('user_profiles').doc(userId);
+    await userDocRef.set(profile.toMap());
+
+    // Create "My Recipes" list with order 0 and fixed ID
+    final myRecipesListRef = userDocRef.collection('lists').doc('my_recipes');
+    await myRecipesListRef.set({
+      'title': 'My Recipes',
+      'order': 0,
+      'ownerId': userId,
+      'recipeIds': [],
+    });
   }
 
   // Reset Password

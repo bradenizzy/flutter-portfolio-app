@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 class Recipe {
   static final Uuid uuid = Uuid();
   final String id; // Unique ID for the recipe
+  final String ownerId; // ID of the user who owns the recipe
   final List<String> images; // URLs for recipe images
   final String title; // Recipe title (required)
   final String prepTime; // Prep time
@@ -30,6 +31,7 @@ class Recipe {
 
   Recipe({
     required this.id,
+    required this.ownerId,
     required this.images,
     required this.title,
     required this.prepTime,
@@ -57,6 +59,7 @@ class Recipe {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'ownerId': ownerId,
       'images': images,
       'title': title,
       'prepTime': prepTime,
@@ -85,6 +88,7 @@ class Recipe {
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
       id: json['id'],
+      ownerId: json['ownerId'],
       images: List<String>.from(json['images']),
       title: json['title'],
       prepTime: json['prepTime'],
@@ -118,6 +122,7 @@ class Recipe {
 
   Recipe copyWith({
     String? id,
+    String? ownerId,
     List<String>? images,
     String? title,
     String? prepTime,
@@ -143,6 +148,7 @@ class Recipe {
   }) {
     return Recipe(
       id: id ?? this.id,
+      ownerId: ownerId ?? this.ownerId,
       images: images != null ? List.from(images) : List.from(this.images),
       title: title ?? this.title,
       prepTime: prepTime ?? this.prepTime,

@@ -10,7 +10,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
-import 'package:flutter_portfolio_app/recipes/screens/recipe_edit_screen.dart';
 import 'package:flutter_portfolio_app/recipes/screens/complete_recipe_screen.dart';
 
 class RecipeTitleWidget extends StatefulWidget {
@@ -115,6 +114,7 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
       // Prepare Recipe object
       final placeholderRecipe = Recipe(
         id: recipeId,
+        ownerId: FirebaseAuth.instance.currentUser?.uid ?? 'anonymous',
         images: imageUrls,
         title: _titleController.text,
         prepTime: '', // Placeholder for now
@@ -149,8 +149,14 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
           .doc(recipeId)
           .set(placeholderRecipe.toJson());
 
+      // ───────────────────────────────────────────────────────────────
+      // TODO: EVENTUALLY, WE WILL REMOVE THESE REDUNDENT CALLS TO FIRESTORE
       // Add recipeId to user's userRecipeIds list
       await _addRecipeToUserList(recipeId);
+
+      // Add recipeId to my_recipes list
+      await _addRecipeToMyRecipesList(recipeId);
+      //───────────────────────────────────────────────────────────────
 
       // Fetch the fresh recipe from Firestore
       final fetchedSnapshot = await FirebaseFirestore.instance
@@ -197,6 +203,21 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
         } else {
           transaction.set(userRef, {'userRecipeIds': [recipeId]});
         }
+      });
+    }
+  }
+
+  Future<void> _addRecipeToMyRecipesList(String recipeId) async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      final listRef = FirebaseFirestore.instance
+          .collection('user_profiles')
+          .doc(userId)
+          .collection('lists')
+          .doc('my_recipes');
+
+      await listRef.update({
+        'recipeIds': FieldValue.arrayUnion([recipeId]),
       });
     }
   }

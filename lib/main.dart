@@ -1,5 +1,6 @@
 // TODO: TEST COOKBOOKS SCREEN
 
+// TODO: remove a recipe from a list using the menu? But don't have remove from list as an option in the complete recipe screen??
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -39,6 +40,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'recipes/screens/onboarding/onboarding_screen.dart';
 import 'recipes/screens/onboarding/splash_screen.dart';
 import 'recipes/screens/onboarding/onboarding_screen.dart';
+
 void main() async {
   //debugPaintPointersEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();

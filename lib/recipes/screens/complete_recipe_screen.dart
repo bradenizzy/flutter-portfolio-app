@@ -1,6 +1,8 @@
 // complete_recipe_screen.dart
 
- // TODO: ADD PUBLIC IMAGES ATTRIBUTE TO RECIPE MODEL
+// TODO: ADD PUBLIC IMAGES ATTRIBUTE TO RECIPE MODEL
+
+// TODO: implement the menu item functions
 
 import 'package:flutter/material.dart';
 import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
@@ -16,8 +18,13 @@ import 'package:flutter_portfolio_app/recipes/services/recipe_service.dart';
 import 'loading_screen.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/recipe_bottom_nav_bar.dart';
 import 'package:flutter_portfolio_app/recipes/widgets/favorite_button_widget.dart';
+import 'package:flutter_portfolio_app/recipes/widgets/recipe_screen_widgets/delete_recipe_button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_portfolio_app/recipes/providers/user_profile_provider.dart';
+import 'package:flutter_portfolio_app/recipes/providers/recipe_lists_provider.dart';
 import 'package:provider/provider.dart';
+
 
 class CompleteRecipeScreen extends StatefulWidget {
   final Recipe recipe;
@@ -32,7 +39,6 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
   late Recipe recipe;
   late Recipe originalRecipe;
   final RecipeService recipeService = RecipeService();
-
 
   @override
   void initState() {
@@ -51,6 +57,72 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
       });
     }
   }
+
+  Future<void> _handleRecipeDeletion() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final recipeId = recipe.id;
+
+    if (userId == null || recipeId.isEmpty) return;
+    if (recipe.ownerId != userId) return;
+
+    try {
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => Center(child: CircularProgressIndicator()),
+      );
+
+      final firestore = FirebaseFirestore.instance;
+
+      // 1. Delete recipe document
+      await firestore.collection('recipes').doc(recipeId).delete();
+
+      // 2. Remove from userProfile.userRecipeIds
+      final userRef = firestore.collection('user_profiles').doc(userId);
+      await userRef.update({
+        'userRecipeIds': FieldValue.arrayRemove([recipeId]),
+        'favoriteRecipeIds': FieldValue.arrayRemove([recipeId])
+      });
+
+      // 3. Remove from my_recipes list
+      final myRecipesListRef = userRef.collection('lists').doc('my_recipes');
+      await myRecipesListRef.update({
+        'recipeIds': FieldValue.arrayRemove([recipeId])
+      });
+
+      // 4. Remove from all user lists
+      final listSnapshot = await userRef.collection('lists').get();
+      for (var doc in listSnapshot.docs) {
+        await doc.reference.update({
+          'recipeIds': FieldValue.arrayRemove([recipeId])
+        });
+      }
+
+      // update providers
+      context.read<UserProfileProvider>().removeRecipeFromFavorites(recipeId);
+      context.read<RecipeListsProvider>().removeRecipeFromLists(recipeId);
+
+
+      // Done — pop the loading indicator
+      Navigator.of(context).pop();
+
+      // Navigate home or pop current route
+      Navigator.of(context).pop(); // go back one screen
+
+      // Optional: show confirmation
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Recipe deleted')),
+      );
+    } catch (e) {
+      Navigator.of(context).pop(); // Close loading if there's an error
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete recipe: $e')),
+      );
+    }
+  }
+
 
   // Shows a confirmation dialog for discarding changes
   Future<void> _confirmDiscardChanges() async {
@@ -123,7 +195,13 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Recipe'),
+        title: Stack(
+          alignment: Alignment.center,
+          children: [
+            Text(recipe.title),
+          ],
+        ),
+        centerTitle: true,
         actions: [      
           FavoriteButtonWidget(
             recipeId: recipe.id,
@@ -137,6 +215,38 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
               icon: Icon(Icons.save),
               onPressed: _confirmSaveRecipe, // Use confirmation before saving
             ),
+          PopupMenuButton(
+            icon: Icon(Icons.more_vert),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                child: Text('Add to List'),
+                value: 'add_to_list',
+              ),
+              PopupMenuItem(
+                child: Text('Share'),
+                value: 'share',
+              ),
+              if (recipe.ownerId == FirebaseAuth.instance.currentUser?.uid)
+                PopupMenuItem(
+                  child: Text('Delete'),
+                  value: 'delete',
+                ),
+            ],
+            onSelected: (value) {
+              // Handle menu item selection
+              switch (value) {
+                case 'add_to_list':
+                  // TODO: Show add to list dialog
+                  break;
+                case 'share':
+                  // TODO: Show share dialog
+                  break;
+                case 'delete':
+                  // TODO: Show delete confirmation
+                  break;
+              }
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -305,6 +415,16 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
               PlaceholderWidget(title: 'Related Recipes Placeholder'),
               SizedBox(height: 16),
               PlaceholderWidget(title: 'Comments Placeholder'),
+              
+              SizedBox(height: 16),
+              if (isEditMode)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 16.0),
+                child: DeleteRecipeButton(
+                  onConfirmDelete: _handleRecipeDeletion,
+                ),
+              ),
+                
             ],
           ),
         ),
@@ -313,6 +433,8 @@ class _CompleteRecipeScreenState extends State<CompleteRecipeScreen> {
     );
   }
 }
+
+
 
 /// A simple widget to act as a placeholder for sections
 class PlaceholderWidget extends StatelessWidget {

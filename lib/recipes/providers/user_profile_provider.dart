@@ -84,6 +84,14 @@ class UserProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removeRecipeFromFavorites(String recipeId) {
+    _favoriteRecipes.removeWhere((r) => r.id == recipeId);
+    _userProfile = _userProfile?.copyWith(
+      favoriteRecipeIds: _userProfile!.favoriteRecipeIds.where((id) => id != recipeId).toList(),
+    );
+    notifyListeners();
+  }
+
   /// Clear all user data
   void clear() {
     _userProfile = null;

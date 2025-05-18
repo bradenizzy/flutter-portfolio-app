@@ -1,13 +1,15 @@
-// TODO: no current way to add a recipe to a list??
+// TODO: no current way to add a recipe to a list from this page??
+
+// TODO: remove a recipe from a list using the menu?
 
 // cookbooks_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/recipe_lists_provider.dart';
+import '../providers/user_profile_provider.dart';
 import '../widgets/recipe_preview_card.dart';
 import '../widgets/recipe_bottom_nav_bar.dart';
 import '../screens/complete_recipe_screen.dart';
-import '../models/recipe_list.dart';
 
 /// Screen: CookbooksScreen
 class CookbooksScreen extends StatefulWidget {
@@ -31,7 +33,7 @@ class _CookbooksScreenState extends State<CookbooksScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Lists'),
+        title: Text('My Cookbooks'),
         actions: [
           IconButton(
             icon: Icon(Icons.add),
@@ -44,15 +46,91 @@ class _CookbooksScreenState extends State<CookbooksScreen> {
       body: lists.isEmpty
         ? Center(child: Text('No lists found.'))
         : ReorderableListView.builder(
-            itemCount: lists.length,
-            onReorder: (oldIndex, newIndex) {
-              context.read<RecipeListsProvider>().reorderLists(oldIndex, newIndex);
-            },
-            itemBuilder: (context, index) {
-              final list = lists[index];
-              final recipes = provider.getRecipesForList(list.listId);
+          itemCount: lists.length,
+          onReorder: (oldIndex, newIndex) {
+            context.read<RecipeListsProvider>().reorderLists(oldIndex, newIndex);
+          },
+          itemBuilder: (context, index) {
+            final list = lists[index];
+            final recipes = provider.getRecipesForList(list.listId);
+            
+            final isProtectedList = list.listId == 'my_recipes';
 
-              return Dismissible(
+            return isProtectedList
+            ? Dismissible(
+                key: ValueKey(list.listId),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.redAccent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.lock, size: 18, color: Colors.white),
+                ),
+                confirmDismiss: (_) async {
+                await showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: Text("Whoa there, Chef 👨‍🍳"),
+                    content: Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        'You can’t delete your "My Recipes" list — it holds all the meals you’ve created! '
+                        'Deleting it would erase your delicious history.',
+                      ),
+                    ),
+                    actions: [
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                          child: Text("Back to Cooking"),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+                return false;
+              },
+                child: Card(
+                  elevation: 2,
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      title: Row(
+                        children: [
+                          Icon(Icons.drag_handle, color: Colors.grey),
+                          SizedBox(width: 8),
+                          Expanded(child: Text(list.title)),
+                        ],
+                      ),
+                      initiallyExpanded: index == 0,
+                      children: recipes.map((recipe) {
+                        return Consumer<UserProfileProvider>(
+                          builder: (context, userProfileProvider, child) {
+                            return RecipePreviewCard(
+                              recipe: recipe,
+                              onUnfavorite: () => userProfileProvider.toggleFavorite(recipe.id),
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CompleteRecipeScreen(recipe: recipe),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              )
+              : Dismissible(
                 key: ValueKey(list.listId),
                 direction: DismissDirection.endToStart,
                 background: Container(
@@ -70,7 +148,7 @@ class _CookbooksScreenState extends State<CookbooksScreen> {
                     context: context,
                     builder: (_) => AlertDialog(
                       title: Text('Delete List'),
-                      content: Text('Are you sure you want to delete "${list.title}"? This cannot be undone.'),
+                      content: Text('Are you sure you want to delete "${list.title}"? This action cannot be undone.'),
                       actions: [
                         TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('Cancel')),
                         ElevatedButton(
@@ -101,21 +179,25 @@ class _CookbooksScreenState extends State<CookbooksScreen> {
                       ),
                       initiallyExpanded: index == 0,
                       children: recipes.map((recipe) {
-                        return RecipePreviewCard(
-                          recipe: recipe,
-                          onUnfavorite: () => {},
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CompleteRecipeScreen(recipe: recipe),
-                            ),
-                          ),
+                        return Consumer<UserProfileProvider>(
+                          builder: (context, userProfileProvider, child) {
+                            return RecipePreviewCard(
+                              recipe: recipe,
+                              onUnfavorite: () => userProfileProvider.toggleFavorite(recipe.id),
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CompleteRecipeScreen(recipe: recipe),
+                                ),
+                              ),
+                            );
+                          },
                         );
                       }).toList(),
                     ),
                   ),
                 ),
-              ); 
+              );
             },
           ),
       bottomNavigationBar: RecipeBottomNavBar(),
@@ -152,30 +234,31 @@ class _CookbooksScreenState extends State<CookbooksScreen> {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, RecipeList list) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Delete List'),
-        content: Text('Are you sure you want to delete "${list.title}"? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('Delete'),
-            onPressed: () async {
-              await context.read<RecipeListsProvider>().deleteList(list.listId);
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
-    );
-  }
+  //TODO: IMPLEMENT THIS MENTHOD TO MAKE CODE CLEANER
+  // void _showDeleteConfirmationDialog(BuildContext context, RecipeList list) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       title: Text('Delete List'),
+  //       content: Text('Are you sure you want to delete "${list.title}"? This action cannot be undone.'),
+  //       actions: [
+  //         TextButton(
+  //           child: Text('Cancel'),
+  //           onPressed: () => Navigator.of(context).pop(),
+  //         ),
+  //         ElevatedButton(
+  //           style: ElevatedButton.styleFrom(
+  //             backgroundColor: Colors.red,
+  //             foregroundColor: Colors.white,
+  //           ),
+  //           child: Text('Delete'),
+  //           onPressed: () async {
+  //             await context.read<RecipeListsProvider>().deleteList(list.listId);
+  //             Navigator.of(context).pop();
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
