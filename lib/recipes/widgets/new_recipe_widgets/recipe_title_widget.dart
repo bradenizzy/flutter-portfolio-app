@@ -1,6 +1,5 @@
 // recipe_title_widget.dart
 
-//  THIRD TODO !!!!!!! TODO: IMPLEMENT OPENAI API !!!!!!!
 //  FOURTH TODO !!!!!!! TODO: IMPLEMENT MANUAL RECIPE CREATION !!!!!!!
 
 import 'dart:io';
@@ -11,7 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_portfolio_app/recipes/models/recipe.dart';
 import 'package:flutter_portfolio_app/recipes/screens/complete_recipe_screen.dart';
-
+import 'package:flutter_portfolio_app/recipes/services/recipe_service.dart';
 class RecipeTitleWidget extends StatefulWidget {
   final String source; // Source: Camera, Photos, or Manually
 
@@ -74,7 +73,6 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
 
   void _handleSave() async {
     if (_titleController.text.isEmpty) {
-      // Prompt user to enter a title
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter a recipe title')),
       );
@@ -85,22 +83,19 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Center(child: CircularProgressIndicator());
-      },
+      builder: (BuildContext context) => Center(child: CircularProgressIndicator()),
     );
 
     try {
-      // Generate unique recipe ID
+      final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
       final recipeId = FirebaseFirestore.instance.collection('recipes').doc().id;
-      
-      String generateImageName() {  
-        final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+
+      String generateImageName() {
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         return '${userId}_$timestamp.jpg';
       }
 
-      // Upload images to Firebase Storage
+      // Upload images
       List<String> imageUrls = [];
       for (var image in _selectedImages) {
         final ref = FirebaseStorage.instance
@@ -111,81 +106,163 @@ class _RecipeTitleWidgetState extends State<RecipeTitleWidget> {
         imageUrls.add(imageUrl);
       }
 
-      // Prepare Recipe object
-      final placeholderRecipe = Recipe(
-        id: recipeId,
-        ownerId: FirebaseAuth.instance.currentUser?.uid ?? 'anonymous',
-        images: imageUrls,
+      // 1. Classify images
+      final goodImages = await RecipeService().classifyRecipeImages(imageUrls);
+
+      if (goodImages.isEmpty) {
+        throw Exception('No recipe-relevant images found.');
+      }
+
+      // 2. Extract structured recipe
+      final recipe = await RecipeService().extractRecipeFromImages(
+        ownerId: userId,
+        recipeId: recipeId,
         title: _titleController.text,
-        prepTime: '', // Placeholder for now
-        cookTime: '',
-        restTime: '',
-        totalTime: '',
-        rating: 0.0,
-        reviewsCount: 0,
-        servings: 1,
-        servingsUnit: "Servings",
-        tags: [],
-        description: '',
-        ingredients: [],
-        ingredientsFormat: '',
-        equipment: [],
-        instructions: [],
-        notes: Notes(),
-        nutrition: Nutrition(),
-        link: '',
-        author: FirebaseAuth.instance.currentUser?.displayName ?? 'Unknown Author',
-        source: 'Custom',
-        isPublic: false,
+        imageUrls: goodImages,
       );
 
-      // // TODO: Integrate with OpenAI API
-      // // Simulate sending images to OpenAI and processing JSON response
-      // // This will be implemented in the future
-
-      // Save to Firestore
+      // 3. Save final recipe to Firestore
       await FirebaseFirestore.instance
           .collection('recipes')
           .doc(recipeId)
-          .set(placeholderRecipe.toJson());
+          .set(recipe.toJson());
 
-      // ───────────────────────────────────────────────────────────────
-      // TODO: EVENTUALLY, WE WILL REMOVE THESE REDUNDENT CALLS TO FIRESTORE
-      // Add recipeId to user's userRecipeIds list
+      // Update user’s lists
       await _addRecipeToUserList(recipeId);
-
-      // Add recipeId to my_recipes list
       await _addRecipeToMyRecipesList(recipeId);
-      //───────────────────────────────────────────────────────────────
 
-      // Fetch the fresh recipe from Firestore
-      final fetchedSnapshot = await FirebaseFirestore.instance
-          .collection('recipes')
-          .doc(recipeId)
-          .get();
-
-      final recipe = Recipe.fromJson(fetchedSnapshot.data()!);
-
-      // Close loading indicator
+      // Close loading
       Navigator.of(context).pop();
 
-      // Navigate to CompleteRecipeScreen without allowing back navigation
+      // Navigate to CompleteRecipeScreen
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(
-          builder: (context) => CompleteRecipeScreen(recipe: recipe),
-        ),
-        (Route<dynamic> route) => false, // remove all previous routes
+        MaterialPageRoute(builder: (context) => CompleteRecipeScreen(recipe: recipe)),
+        (Route<dynamic> route) => false,
       );
-      
     } catch (e) {
-      // Handle errors
-      Navigator.of(context).pop(); // Close loading indicator
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save recipe: $e')),
       );
     }
   }
+
+  // ───────────────────────────────────────────────────────────────
+  // PRE-OPENAI API IMPLEMENTATION
+  // void _handleSave() async {
+  //   if (_titleController.text.isEmpty) {
+  //     // Prompt user to enter a title
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Please enter a recipe title')),
+  //     );
+  //     return;
+  //   }
+
+  //   // Show loading indicator
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext context) {
+  //       return Center(child: CircularProgressIndicator());
+  //     },
+  //   );
+
+  //   try {
+  //     // Generate unique recipe ID
+  //     final recipeId = FirebaseFirestore.instance.collection('recipes').doc().id;
+      
+  //     String generateImageName() {  
+  //       final userId = FirebaseAuth.instance.currentUser?.uid ?? 'anonymous';
+  //       final timestamp = DateTime.now().millisecondsSinceEpoch;
+  //       return '${userId}_$timestamp.jpg';
+  //     }
+
+  //     // Upload images to Firebase Storage
+  //     List<String> imageUrls = [];
+  //     for (var image in _selectedImages) {
+  //       final ref = FirebaseStorage.instance
+  //           .ref()
+  //           .child('recipes/$recipeId/images/${generateImageName()}');
+  //       final uploadTask = await ref.putFile(image);
+  //       final imageUrl = await uploadTask.ref.getDownloadURL();
+  //       imageUrls.add(imageUrl);
+  //     }
+
+  //     // Prepare Recipe object
+  //     final placeholderRecipe = Recipe(
+  //       id: recipeId,
+  //       ownerId: FirebaseAuth.instance.currentUser?.uid ?? 'anonymous',
+  //       images: imageUrls,
+  //       title: _titleController.text,
+  //       prepTime: '', // Placeholder for now
+  //       cookTime: '',
+  //       restTime: '',
+  //       totalTime: '',
+  //       rating: 0.0,
+  //       reviewsCount: 0,
+  //       servings: 1,
+  //       servingsUnit: "Servings",
+  //       tags: [],
+  //       description: '',
+  //       ingredients: [],
+  //       ingredientsFormat: '',
+  //       equipment: [],
+  //       instructions: [],
+  //       notes: Notes(),
+  //       nutrition: Nutrition(),
+  //       isPublic: false,
+  //     );
+
+  //     // // TODO: Integrate with OpenAI API
+  //     // // SEE https://colab.research.google.com/drive/1RTm12RSM2PlYTR8xlDX391aLD9tnjVk9#scrollTo=TrytQ6QGNMXl
+  //     // // See API: https://hands-app-api.onrender.com
+  //     // // Simulate sending images to OpenAI and processing JSON response
+  //     // // send body: jsonEncode({ 'image_urls': imageUrls })
+
+  //     // Save to Firestore
+  //     await FirebaseFirestore.instance
+  //         .collection('recipes')
+  //         .doc(recipeId)
+  //         .set(placeholderRecipe.toJson());
+
+  //     // ───────────────────────────────────────────────────────────────
+  //     // TODO: EVENTUALLY, WE WILL REMOVE THESE REDUNDENT CALLS TO FIRESTORE
+  //     // Add recipeId to user's userRecipeIds list
+  //     await _addRecipeToUserList(recipeId);
+
+  //     // Add recipeId to my_recipes list
+  //     await _addRecipeToMyRecipesList(recipeId);
+  //     //───────────────────────────────────────────────────────────────
+
+  //     // Fetch the fresh recipe from Firestore
+  //     final fetchedSnapshot = await FirebaseFirestore.instance
+  //         .collection('recipes')
+  //         .doc(recipeId)
+  //         .get();
+
+  //     final recipe = Recipe.fromJson(fetchedSnapshot.data()!);
+
+  //     // Close loading indicator
+  //     Navigator.of(context).pop();
+
+  //     // Navigate to CompleteRecipeScreen without allowing back navigation
+  //     Navigator.pushAndRemoveUntil(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) => CompleteRecipeScreen(recipe: recipe),
+  //       ),
+  //       (Route<dynamic> route) => false, // remove all previous routes
+  //     );
+      
+  //   } catch (e) {
+  //     // Handle errors
+  //     Navigator.of(context).pop(); // Close loading indicator
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Failed to save recipe: $e')),
+  //     );
+  //   }
+  // }
 
   //TODO: consider if we should also update our UserProfile provider with this id?
   Future<void> _addRecipeToUserList(String recipeId) async {

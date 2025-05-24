@@ -167,7 +167,7 @@ class _NotesWidgetState extends State<NotesWidget> {
                                 child: TextFormField(
                                   controller: noteEntry.controller,
                                   onChanged: (newText) {
-                                    noteEntry.value = newText;       // Store it in memory ✅
+                                    noteEntry.value = newText;
                                   },
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),

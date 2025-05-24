@@ -2,6 +2,8 @@
 
 // TODO: remove a recipe from a list using the menu? But don't have remove from list as an option in the complete recipe screen??
 
+// TODO: When deleting recipe, also delete the images connected to the recipe
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';

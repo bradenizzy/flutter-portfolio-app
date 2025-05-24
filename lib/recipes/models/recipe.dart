@@ -2,6 +2,8 @@
 import 'package:uuid/uuid.dart';
 
 // TODO: ADD PUBLIC ATTRIBUTES TO RECIPE MODEL (e.g. publicImages, ... )
+
+
 class Recipe {
   static final Uuid uuid = Uuid();
   final String id; // Unique ID for the recipe
@@ -24,9 +26,9 @@ class Recipe {
   final List<InstructionSection> instructions; // Instructions (divided into sections if applicable)
   Notes notes; // Notes for the recipe
   Nutrition nutrition; // Nutrition details
-  final String link; // Original source link
-  final String author; // Author of the recipe
-  final String source; // Source type (e.g., Instagram, Website)
+  final String? link; // Original source link
+  final String? author; // Author of the recipe
+  final String? source; // Source type (e.g., Instagram, Website)
   final bool isPublic; // True if the recipe is public, false if private
 
   Recipe({
@@ -45,14 +47,14 @@ class Recipe {
     required this.tags,
     required this.description,
     required this.ingredients,
-    required this.ingredientsFormat,
+    this.ingredientsFormat = "US Customary", // Default to US Customary
     required this.equipment,
     required this.instructions,
     required this.notes,
     required this.nutrition,
-    required this.link,
-    required this.author,
-    required this.source,
+    this.link,
+    this.author,
+    this.source,
     this.isPublic = false,
   });
 
@@ -78,9 +80,9 @@ class Recipe {
       'instructions': instructions.map((i) => i.toJson()).toList(),
       'notes': notes.toJson(),
       'nutrition': nutrition.toJson(),
-      'link': link,
-      'author': author,
-      'source': source,
+      'link': link ?? '',
+      'author': author ?? 'Unknown Author',
+      'source': source ?? 'Custom',
       'isPublic': isPublic,
     };
   }
@@ -185,7 +187,7 @@ class Recipe {
 // TODO: CREATE A MASTER INGREDIENT ID SYSTEM TO ASSIGN UNIQUE IDS TO INGREDIENTS
 class Ingredient {
   final String id;
-  final String quantity;
+  final String quantity; // TODO:SHOULD WE KEEP THIS AS A STRING OR FLOAT?
   final String unit;
   final String name;
 

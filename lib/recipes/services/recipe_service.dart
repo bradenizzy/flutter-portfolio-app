@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/recipe.dart';
 import '../models/recipe_list.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RecipeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -153,6 +155,53 @@ class RecipeService {
       throw Exception('Failed to delete recipe list: $e');
     }
   }
+
+
+  // ───────────────────────────────────────────────────────────────
+  // openAi Integrations
+  // ───────────────────────────────────────────────────────────────
+
+
+  Future<List<String>> classifyRecipeImages(List<String> imageUrls) async {
+    final uri = Uri.parse('https://hands-app-api.onrender.com/classify-images');
+    final response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'image_urls': imageUrls}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to classify images');
+    }
+
+    return List<String>.from(jsonDecode(response.body));
+  }
+
+  Future<Recipe> extractRecipeFromImages({
+    required String ownerId,
+    required String recipeId,
+    required String title,
+    required List<String> imageUrls,
+  }) async {
+    final uri = Uri.parse(
+      'https://hands-app-api.onrender.com/extract-recipe'
+      '?ownerId=$ownerId&recipeId=$recipeId&title=${Uri.encodeComponent(title)}',
+    );
+
+    final response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'image_urls': imageUrls}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to extract recipe');
+    }
+
+    final data = jsonDecode(response.body);
+    return Recipe.fromJson(data);
+  }
+
 
   // TODO: For when we implement a "revert to original" feature
   // Future<Recipe> fetchOriginalBackup(String recipeId) async {
